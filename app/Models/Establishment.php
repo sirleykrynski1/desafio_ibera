@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Establishment extends Model
 {
@@ -24,6 +25,17 @@ class Establishment extends Model
         'longitude',
         'max_capacity',
         'biodigester_capacity_l',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'ocupacion_actual',
+        'fecha_ultimo_desagote',
+        'capacidad_fosa_litros',
     ];
 
     /**
@@ -62,6 +74,16 @@ class Establishment extends Model
     }
 
     /**
+     * Último registro de ocupación reportado.
+     *
+     * @return HasOne<OccupancyLog, $this>
+     */
+    public function latestOccupancyLog(): HasOne
+    {
+        return $this->hasOne(OccupancyLog::class)->latestOfMany('date_reported');
+    }
+
+    /**
      * Registros de mantenimiento y vaciado de fosa.
      *
      * @return HasMany<MaintenanceLog, $this>
@@ -69,6 +91,16 @@ class Establishment extends Model
     public function maintenanceLogs(): HasMany
     {
         return $this->hasMany(MaintenanceLog::class);
+    }
+
+    /**
+     * Último mantenimiento registrado/aprobado.
+     *
+     * @return HasOne<MaintenanceLog, $this>
+     */
+    public function latestMaintenanceLog(): HasOne
+    {
+        return $this->hasOne(MaintenanceLog::class)->latestOfMany('maintenance_date');
     }
 
     /**
@@ -82,6 +114,16 @@ class Establishment extends Model
     }
 
     /**
+     * Última evaluación de riesgo del establecimiento.
+     *
+     * @return HasOne<RiskEvaluation, $this>
+     */
+    public function latestRiskEvaluation(): HasOne
+    {
+        return $this->hasOne(RiskEvaluation::class)->latestOfMany('evaluation_date');
+    }
+
+    /**
      * Insignias ecológicas ganadas.
      *
      * @return HasMany<EcoBadge, $this>
@@ -89,5 +131,29 @@ class Establishment extends Model
     public function ecoBadges(): HasMany
     {
         return $this->hasMany(EcoBadge::class);
+    }
+
+    /**
+     * Accessor: Ocupación actual de personas.
+     */
+    public function getOcupacionActualAttribute(): int
+    {
+        return $this->latestOccupancyLog?->current_guests ?? 0;
+    }
+
+    /**
+     * Accessor: Fecha del último desagote/mantenimiento.
+     */
+    public function getFechaUltimoDesagoteAttribute(): ?string
+    {
+        return $this->latestMaintenanceLog?->maintenance_date?->format('Y-m-d');
+    }
+
+    /**
+     * Accessor: Alias en español para la capacidad del biodigestor en litros.
+     */
+    public function getCapacidadFosaLitrosAttribute(): int
+    {
+        return $this->biodigester_capacity_l ?? 0;
     }
 }
