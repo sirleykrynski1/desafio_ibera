@@ -4,6 +4,8 @@ from config import (
     UMBRAL_OCUPACION_ALTA,
     UMBRAL_MANTENIMIENTO_ATRASADO,
     UMBRAL_LLUVIA_INTENSA,
+    UMBRAL_OCUPACION_CRITICA,
+    UMBRAL_MANTENIMIENTO_CRITICO,
     PESO_OCUPACION,
     PESO_MANTENIMIENTO,
     PESO_LLUVIA,
@@ -94,6 +96,16 @@ def calcular_riesgo(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     df["nivel_riesgo"] = df["nivel_riesgo"].astype("object")
+
+    condicion_critica = (
+        (df["ocupacion_pct"] >= UMBRAL_OCUPACION_CRITICA) & (df["dias_desde_mantenimiento"] > UMBRAL_MANTENIMIENTO_CRITICO)
+    )
+
+    df.loc[
+        condicion_critica,
+        "nivel_riesgo"
+    ] = "ROJO"
+
     df.loc[
         ~df["clima_disponible"],
         "nivel_riesgo"
@@ -167,7 +179,7 @@ def obtener_accion_prioritaria(fila):
 
     if nivel == "ROJO":
         return (
-            "Priorizar una inspección preventiva del Sistema Sanitario"
+            "Priorizar una inspección preventiva del Sistema Sanitario "
             "y verificar su capacidad antes del evento de riesgo."
         )
 
