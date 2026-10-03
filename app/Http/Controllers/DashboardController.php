@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Establishment;
-use App\Models\MaintenanceLog;
+use App\Models\Establecimiento;
+use App\Models\Mantenimiento;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,81 +17,81 @@ class DashboardController extends Controller
     public function index(Request $request): View|JsonResponse
     {
         $user = $request->user();
-        $isGobiernoOrInspector = $user && in_array($user->role, ['admin_gobierno', 'inspector']);
+        $esGobiernoOInspector = $user && in_array($user->rol, ['admin_gobierno', 'inspector']);
 
         // 1. Filtrar establecimientos según el rol
-        $query = Establishment::query()
+        $query = Establecimiento::query()
             ->with([
-                'latestRiskEvaluation',
-                'latestOccupancyLog',
-                'latestMaintenanceLog',
-                'user:id,name,apellido,telefono',
+                'ultimoRiesgo',
+                'ultimaOcupacion',
+                'ultimoMantenimiento',
+                'user:id,nombre,apellido,telefono',
             ]);
 
-        if (! $isGobiernoOrInspector && $user) {
+        if (! $esGobiernoOInspector && $user) {
             // El propietario solo ve sus propios establecimientos
             $query->where('user_id', $user->id);
         }
 
-        $establishments = $query->get();
+        $establecimientos = $query->get();
 
-        // 2. Formatear datos para los marcadores de Leaflet en el Frontend
-        $mapMarkers = $establishments->map(function (Establishment $establishment) use ($isGobiernoOrInspector) {
-            $latestRisk = $establishment->latestRiskEvaluation;
+        // 2. Formatear datos para los marcadores del mapa en el frontend
+        $marcadores = $establecimientos->map(function (Establecimiento $establecimiento) use ($esGobiernoOInspector) {
+            $ultimoRiesgo = $establecimiento->ultimoRiesgo;
 
-            $markerData = [
-                'id' => $establishment->id,
-                'name' => $establishment->name,
-                'type' => $establishment->type,
-                'latitude' => (float) $establishment->latitude,
-                'longitude' => (float) $establishment->longitude,
-                'max_capacity' => $establishment->max_capacity,
-                'biodigester_capacity_l' => $establishment->biodigester_capacity_l,
-                'capacidad_fosa_litros' => $establishment->capacidad_fosa_litros,
-                'ocupacion_actual' => $establishment->ocupacion_actual,
-                'fecha_ultimo_desagote' => $establishment->fecha_ultimo_desagote,
-                'risk_level' => $latestRisk?->risk_level ?? 'sin_evaluar',
-                'rain_forecast_mm' => $latestRisk?->rain_forecast_mm ?? 0,
-                'last_evaluated_at' => $latestRisk?->evaluation_date?->toIso8601String(),
+            $datosMarcador = [
+                'id' => $establecimiento->id,
+                'nombre' => $establecimiento->nombre,
+                'rubro' => $establecimiento->rubro,
+                'latitud' => (float) $establecimiento->latitud,
+                'longitud' => (float) $establecimiento->longitud,
+                'capacidad_maxima' => $establecimiento->capacidad_maxima,
+                'capacidad_biodigestor' => $establecimiento->capacidad_biodigestor,
+                'capacidad_fosa_litros' => $establecimiento->capacidad_fosa_litros,
+                'ocupacion_actual' => $establecimiento->ocupacion_actual,
+                'fecha_ultimo_desagote' => $establecimiento->fecha_ultimo_desagote,
+                'nivel_riesgo' => $ultimoRiesgo?->nivel_riesgo ?? 'sin_evaluar',
+                'lluvia_pronosticada' => $ultimoRiesgo?->lluvia_pronosticada ?? 0,
+                'fecha_evaluacion' => $ultimoRiesgo?->fecha_evaluacion?->toIso8601String(),
             ];
 
             // Si es gobierno o inspector, incluimos datos de contacto del dueño
-            if ($isGobiernoOrInspector) {
-                $markerData['owner_name'] = $establishment->user ? "{$establishment->user->name} {$establishment->user->apellido}" : 'N/A';
-                $markerData['owner_phone'] = $establishment->user?->telefono ?? 'N/A';
+            if ($esGobiernoOInspector) {
+                $datosMarcador['nombre_propietario'] = $establecimiento->user ? "{$establecimiento->user->nombre} {$establecimiento->user->apellido}" : 'N/A';
+                $datosMarcador['telefono_propietario'] = $establecimiento->user?->telefono ?? 'N/A';
             }
 
-            return $markerData;
+            return $datosMarcador;
         });
 
         // 3. Métricas y KPIs adaptados al rol
-        $stats = [
-            'total_establishments' => $establishments->count(),
-            'risk_counts' => [
-                'verde' => $establishments->filter(fn ($e) => $e->latestRiskEvaluation?->risk_level === 'verde')->count(),
-                'amarillo' => $establishments->filter(fn ($e) => $e->latestRiskEvaluation?->risk_level === 'amarillo')->count(),
-                'rojo' => $establishments->filter(fn ($e) => $e->latestRiskEvaluation?->risk_level === 'rojo')->count(),
-                'sin_evaluar' => $establishments->filter(fn ($e) => ! $e->latestRiskEvaluation)->count(),
+        $estadisticas = [
+            'total_establecimientos' => $establecimientos->count(),
+            'conteo_riesgos' => [
+                'verde' => $establecimientos->filter(fn ($e) => $e->ultimoRiesgo?->nivel_riesgo === 'verde')->count(),
+                'amarillo' => $establecimientos->filter(fn ($e) => $e->ultimoRiesgo?->nivel_riesgo === 'amarillo')->count(),
+                'rojo' => $establecimientos->filter(fn ($e) => $e->ultimoRiesgo?->nivel_riesgo === 'rojo')->count(),
+                'sin_evaluar' => $establecimientos->filter(fn ($e) => ! $e->ultimoRiesgo)->count(),
             ],
         ];
 
-        if ($isGobiernoOrInspector) {
-            $stats['pending_maintenances'] = MaintenanceLog::where('status', 'pendiente')->count();
+        if ($esGobiernoOInspector) {
+            $estadisticas['mantenimientos_pendientes'] = Mantenimiento::where('estado', 'pendiente')->count();
         } else {
-            $stats['my_eco_badges_count'] = $user ? $user->establishments()->withCount('ecoBadges')->get()->sum('eco_badges_count') : 0;
-            $stats['my_pending_maintenances'] = $user ? MaintenanceLog::whereHas('establishment', fn ($q) => $q->where('user_id', $user->id))->where('status', 'pendiente')->count() : 0;
+            $estadisticas['mis_emblemas_ecologicos'] = $user ? $user->establecimientos()->withCount('emblemasEcologicos')->get()->sum('emblemas_ecologicos_count') : 0;
+            $estadisticas['mis_mantenimientos_pendientes'] = $user ? Mantenimiento::whereHas('establecimiento', fn ($q) => $q->where('user_id', $user->id))->where('estado', 'pendiente')->count() : 0;
         }
 
         // Si la petición espera JSON (ej. fetch desde frontend o API)
         if ($request->wantsJson()) {
             return response()->json([
-                'user_role' => $user?->role ?? 'guest',
-                'stats' => $stats,
-                'map_markers' => $mapMarkers,
+                'rol_usuario' => $user?->rol ?? 'invitado',
+                'estadisticas' => $estadisticas,
+                'marcadores_mapa' => $marcadores,
             ]);
         }
 
         // Si es petición web tradicional, retorna la vista con los datos compactados
-        return view('dashboard', compact('stats', 'mapMarkers', 'establishments', 'isGobiernoOrInspector'));
+        return view('dashboard.index', compact('estadisticas', 'marcadores', 'establecimientos', 'esGobiernoOInspector'));
     }
 }
