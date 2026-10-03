@@ -7,26 +7,26 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecuta las migraciones.
      */
     public function up(): void
     {
-        Schema::create('occupancy_logs', function (Blueprint $table) {
+        Schema::create('ocupaciones', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('establishment_id')
-                ->constrained('establishments')
+            $table->foreignId('establecimiento_id')
+                ->constrained('establecimientos')
                 ->cascadeOnDelete();
-            $table->unsignedInteger('current_guests');
-            $table->date('date_reported');
+            $table->unsignedInteger('numero_personas');
+            $table->date('fecha_registro');
             $table->timestamps();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revierte las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('occupancy_logs');
+        Schema::dropIfExists('ocupaciones');
     }
 };
