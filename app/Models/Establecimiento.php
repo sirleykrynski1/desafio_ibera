@@ -8,9 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Establishment extends Model
+class Establecimiento extends Model
 {
     use HasFactory;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'establecimientos';
 
     /**
      * The attributes that are mass assignable.
@@ -19,12 +26,12 @@ class Establishment extends Model
      */
     protected $fillable = [
         'user_id',
-        'name',
-        'type',
-        'latitude',
-        'longitude',
-        'max_capacity',
-        'biodigester_capacity_l',
+        'nombre',
+        'rubro',
+        'latitud',
+        'longitud',
+        'capacidad_maxima',
+        'capacidad_biodigestor',
     ];
 
     /**
@@ -46,10 +53,10 @@ class Establishment extends Model
     protected function casts(): array
     {
         return [
-            'latitude' => 'decimal:8',
-            'longitude' => 'decimal:8',
-            'max_capacity' => 'integer',
-            'biodigester_capacity_l' => 'integer',
+            'latitud' => 'decimal:8',
+            'longitud' => 'decimal:8',
+            'capacidad_maxima' => 'integer',
+            'capacidad_biodigestor' => 'integer',
         ];
     }
 
@@ -60,77 +67,77 @@ class Establishment extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
      * Registros de ocupación diaria/semanal.
      *
-     * @return HasMany<OccupancyLog, $this>
+     * @return HasMany<Ocupacion, $this>
      */
-    public function occupancyLogs(): HasMany
+    public function ocupaciones(): HasMany
     {
-        return $this->hasMany(OccupancyLog::class);
+        return $this->hasMany(Ocupacion::class, 'establecimiento_id');
     }
 
     /**
      * Último registro de ocupación reportado.
      *
-     * @return HasOne<OccupancyLog, $this>
+     * @return HasOne<Ocupacion, $this>
      */
-    public function latestOccupancyLog(): HasOne
+    public function ultimaOcupacion(): HasOne
     {
-        return $this->hasOne(OccupancyLog::class)->latestOfMany('date_reported');
+        return $this->hasOne(Ocupacion::class, 'establecimiento_id')->latestOfMany('fecha_registro');
     }
 
     /**
      * Registros de mantenimiento y vaciado de fosa.
      *
-     * @return HasMany<MaintenanceLog, $this>
+     * @return HasMany<Mantenimiento, $this>
      */
-    public function maintenanceLogs(): HasMany
+    public function mantenimientos(): HasMany
     {
-        return $this->hasMany(MaintenanceLog::class);
+        return $this->hasMany(Mantenimiento::class, 'establecimiento_id');
     }
 
     /**
      * Último mantenimiento registrado/aprobado.
      *
-     * @return HasOne<MaintenanceLog, $this>
+     * @return HasOne<Mantenimiento, $this>
      */
-    public function latestMaintenanceLog(): HasOne
+    public function ultimoMantenimiento(): HasOne
     {
-        return $this->hasOne(MaintenanceLog::class)->latestOfMany('maintenance_date');
+        return $this->hasOne(Mantenimiento::class, 'establecimiento_id')->latestOfMany('fecha_mantenimiento');
     }
 
     /**
      * Evaluaciones del semáforo de riesgo ambiental.
      *
-     * @return HasMany<RiskEvaluation, $this>
+     * @return HasMany<Riesgo, $this>
      */
-    public function riskEvaluations(): HasMany
+    public function riesgos(): HasMany
     {
-        return $this->hasMany(RiskEvaluation::class);
+        return $this->hasMany(Riesgo::class, 'establecimiento_id');
     }
 
     /**
      * Última evaluación de riesgo del establecimiento.
      *
-     * @return HasOne<RiskEvaluation, $this>
+     * @return HasOne<Riesgo, $this>
      */
-    public function latestRiskEvaluation(): HasOne
+    public function ultimoRiesgo(): HasOne
     {
-        return $this->hasOne(RiskEvaluation::class)->latestOfMany('evaluation_date');
+        return $this->hasOne(Riesgo::class, 'establecimiento_id')->latestOfMany('fecha_evaluacion');
     }
 
     /**
      * Insignias ecológicas ganadas.
      *
-     * @return HasMany<EcoBadge, $this>
+     * @return HasMany<EmblemaEcologico, $this>
      */
-    public function ecoBadges(): HasMany
+    public function emblemasEcologicos(): HasMany
     {
-        return $this->hasMany(EcoBadge::class);
+        return $this->hasMany(EmblemaEcologico::class, 'establecimiento_id');
     }
 
     /**
@@ -138,7 +145,7 @@ class Establishment extends Model
      */
     public function getOcupacionActualAttribute(): int
     {
-        return $this->latestOccupancyLog?->current_guests ?? 0;
+        return $this->ultimaOcupacion?->numero_personas ?? 0;
     }
 
     /**
@@ -146,14 +153,14 @@ class Establishment extends Model
      */
     public function getFechaUltimoDesagoteAttribute(): ?string
     {
-        return $this->latestMaintenanceLog?->maintenance_date?->format('Y-m-d');
+        return $this->ultimoMantenimiento?->fecha_mantenimiento?->format('Y-m-d');
     }
 
     /**
-     * Accessor: Alias en español para la capacidad del biodigestor en litros.
+     * Accessor: Capacidad del biodigestor en litros.
      */
     public function getCapacidadFosaLitrosAttribute(): int
     {
-        return $this->biodigester_capacity_l ?? 0;
+        return $this->capacidad_biodigestor ?? 0;
     }
 }

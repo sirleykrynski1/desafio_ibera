@@ -14,19 +14,26 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'users';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nombre',
         'apellido',
         'email',
         'password',
         'dni',
         'direccion',
         'telefono',
-        'role',
+        'rol',
     ];
 
     /**
@@ -55,10 +62,10 @@ class User extends Authenticatable
     /**
      * Relación: Un usuario propietario tiene muchos establecimientos.
      *
-     * @return HasMany<Establishment, $this>
+     * @return HasMany<Establecimiento, $this>
      */
-    public function establishments(): HasMany
+    public function establecimientos(): HasMany
     {
-        return $this->hasMany(Establishment::class);
+        return $this->hasMany(Establecimiento::class, 'user_id');
     }
 }

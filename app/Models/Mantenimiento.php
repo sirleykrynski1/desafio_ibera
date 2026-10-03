@@ -6,9 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MaintenanceLog extends Model
+class Mantenimiento extends Model
 {
     use HasFactory;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'mantenimientos';
 
     /**
      * The attributes that are mass assignable.
@@ -16,10 +23,10 @@ class MaintenanceLog extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'establishment_id',
-        'maintenance_date',
-        'receipt_image',
-        'status',
+        'establecimiento_id',
+        'fecha_mantenimiento',
+        'comprobante_foto',
+        'estado',
     ];
 
     /**
@@ -30,17 +37,17 @@ class MaintenanceLog extends Model
     protected function casts(): array
     {
         return [
-            'maintenance_date' => 'date',
+            'fecha_mantenimiento' => 'date',
         ];
     }
 
     /**
      * Establecimiento al que pertenece el mantenimiento.
      *
-     * @return BelongsTo<Establishment, $this>
+     * @return BelongsTo<Establecimiento, $this>
      */
-    public function establishment(): BelongsTo
+    public function establecimiento(): BelongsTo
     {
-        return $this->belongsTo(Establishment::class);
+        return $this->belongsTo(Establecimiento::class, 'establecimiento_id');
     }
 }

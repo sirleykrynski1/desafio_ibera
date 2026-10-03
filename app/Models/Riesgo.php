@@ -6,9 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class RiskEvaluation extends Model
+class Riesgo extends Model
 {
     use HasFactory;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'riesgos';
 
     /**
      * The attributes that are mass assignable.
@@ -16,10 +23,10 @@ class RiskEvaluation extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'establishment_id',
-        'risk_level',
-        'rain_forecast_mm',
-        'evaluation_date',
+        'establecimiento_id',
+        'nivel_riesgo',
+        'lluvia_pronosticada',
+        'fecha_evaluacion',
     ];
 
     /**
@@ -30,18 +37,18 @@ class RiskEvaluation extends Model
     protected function casts(): array
     {
         return [
-            'rain_forecast_mm' => 'decimal:2',
-            'evaluation_date' => 'datetime',
+            'lluvia_pronosticada' => 'decimal:2',
+            'fecha_evaluacion' => 'datetime',
         ];
     }
 
     /**
      * Establecimiento evaluado por el motor de riesgo.
      *
-     * @return BelongsTo<Establishment, $this>
+     * @return BelongsTo<Establecimiento, $this>
      */
-    public function establishment(): BelongsTo
+    public function establecimiento(): BelongsTo
     {
-        return $this->belongsTo(Establishment::class);
+        return $this->belongsTo(Establecimiento::class, 'establecimiento_id');
     }
 }
