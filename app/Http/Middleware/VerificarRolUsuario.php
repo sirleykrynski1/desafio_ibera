@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserHasRole
+class VerificarRolUsuario
 {
     /**
      * Handle an incoming request.
@@ -21,7 +21,7 @@ class EnsureUserHasRole
             return redirect()->guest(route('login'));
         }
 
-        if (! in_array($user->role, $roles, true)) {
+        if (! in_array($user->rol, $roles, true)) {
             abort(Response::HTTP_FORBIDDEN, 'Acceso denegado: No cuentas con los permisos requeridos para acceder a este portal.');
         }
 
