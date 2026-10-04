@@ -15,12 +15,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'nombre' => 'Usuario',
+                'apellido' => 'Prueba',
+                'password' => bcrypt('password'),
+                'rol' => 'propietario',
+            ]
+        );
 
-        User::factory()->create([
-            'nombre' => 'Usuario',
-            'apellido' => 'Prueba',
-            'email' => 'test@example.com',
+        $this->call([
+            LimiteEfluenteSeeder::class,
+            PermisoVuelcoSeeder::class,
+            AlertaClimaticaSeeder::class,
+            InsigniaCumplimientoSeeder::class,
+            AnalisisLaboratorioSeeder::class,
+            ParametroAnalisisSeeder::class,
         ]);
     }
 }

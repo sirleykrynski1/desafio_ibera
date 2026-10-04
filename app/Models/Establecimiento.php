@@ -132,12 +132,53 @@ class Establecimiento extends Model
 
     /**
      * Insignias ecológicas ganadas.
+     *  QUITAR
      *
      * @return HasMany<EmblemaEcologico, $this>
      */
     public function emblemasEcologicos(): HasMany
     {
         return $this->hasMany(EmblemaEcologico::class, 'establecimiento_id');
+    }
+
+    /**
+     * Permiso de vuelco otorgado (Relación 1 a 1).
+     *
+     * @return HasOne<PermisoVuelco, $this>
+     */
+    public function permisoVuelco(): HasOne
+    {
+        return $this->hasOne(PermisoVuelco::class, 'establecimiento_id');
+    }
+
+    /**
+     * Alertas climáticas asociadas al establecimiento (Relación 1 a N).
+     *
+     * @return HasMany<AlertaClimatica, $this>
+     */
+    public function alertasClimaticas(): HasMany
+    {
+        return $this->hasMany(AlertaClimatica::class, 'establecimiento_id');
+    }
+
+    /**
+     * Insignias de cumplimiento ambiental obtenidas (Relación 1 a N).
+     *
+     * @return HasMany<InsigniaCumplimiento, $this>
+     */
+    public function insigniasCumplimiento(): HasMany
+    {
+        return $this->hasMany(InsigniaCumplimiento::class, 'establecimiento_id');
+    }
+
+    /**
+     * Análisis de laboratorio realizados (Relación 1 a N).
+     *
+     * @return HasMany<AnalisisLaboratorio, $this>
+     */
+    public function analisisLaboratorios(): HasMany
+    {
+        return $this->hasMany(AnalisisLaboratorio::class, 'establecimiento_id');
     }
 
     /**
