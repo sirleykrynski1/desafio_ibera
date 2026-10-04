@@ -11,3 +11,7 @@ PESO_LLUVIA = 3
 
 MAX_VERDE = 2
 MAX_AMARILLO = 5
+
+# Criterio preventivo del prototipo: acumulado de tres días, no límite normativo.
+UMBRAL_PRECIPITACION_ACUMULADA_MM = 40
+VERSION_REGLAS_CLIMA = "clima-v1"

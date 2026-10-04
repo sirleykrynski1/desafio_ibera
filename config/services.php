@@ -2,6 +2,12 @@
 
 return [
 
+    'climate' => [
+        'url' => env('CLIMATE_API_URL', 'http://127.0.0.1:8001'),
+        'connect_timeout' => (int) env('CLIMATE_API_CONNECT_TIMEOUT', 3),
+        'timeout' => (int) env('CLIMATE_API_TIMEOUT', 15),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
