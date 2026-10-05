@@ -32,6 +32,7 @@ class PermisoVuelco extends Model
     protected $fillable = [
         'establecimiento_id',
         'numero_expediente',
+        'tipo_destino_vuelco',
         'fecha_emision',
         'fecha_vencimiento',
         'estado',
