@@ -59,3 +59,39 @@ Aplica la jerarquía de prioridad del semáforo ambiental:
   1. Evaluaciones totalmente en cumplimiento (100%).
   2. Evaluaciones con parámetros en zona de alerta (🟡).
   3. Evaluaciones con incumplimientos (🔴).
+
+  ## 2. GeneradorFUR
+
+- **Archivo:** `app/Services/GeneradorFUR.php`
+- **Tipo de Servicio:** Generación de documentos PDF.
+
+### 🎯 ¿Para qué sirve?
+El servicio `GeneradorFUR` automatiza la creación del Formulario Único de Registro (FUR). Su objetivo es tomar la información fragmentada en el sistema y unificarla en un documento PDF pre-llenado y listo para su uso administrativo o presentación formal.
+
+### 🧩 Estructura y Funcionamiento Interno
+- **Recopilación de Datos:** Extrae dinámicamente la información del establecimiento (incluyendo los nuevos campos de `cuit`, `ubicacion` y `tipo_destino_vuelco`).
+- **Historial y Permisos:** Anexa los detalles históricos del permiso de vuelco y las renovaciones.
+- **Integración de Evaluaciones:** Incorpora el resultado del semáforo ambiental (evaluación de cumplimiento) en el documento final para dar contexto visual sobre el estado del establecimiento.
+
+### 🧪 Verificación y Calidad de Código
+- **Prueba Feature (Pest):** Se desarrolló la suite de pruebas en `tests/Feature/Services/GeneradorFURTest.php`.
+- **Cobertura:** Cuenta con **5 pruebas** que validan la correcta inyección de datos en la vista, el manejo de establecimientos sin historial y la generación íntegra del archivo PDF.
+
+---
+
+## 3. OCRExtractor
+
+- **Archivo:** `app/Services/OCRExtractor.php`
+- **Tipo de Servicio:** Procesamiento de archivos y normalización de datos.
+
+### 🎯 ¿Para qué sirve?
+Este servicio es el encargado de leer e interpretar los informes de laboratorio subidos en formato PDF. Transforma datos no estructurados en información estructurada que el sistema puede comprender y procesar para su evaluación ambiental.
+
+### 🧩 Estructura y Funcionamiento Interno
+- **Lectura Óptica:** Procesa el texto contenido dentro de los archivos PDF de los laboratorios.
+- **Normalización de Nombres:** Mapea e iguala las variables encontradas en el documento con los nombres canónicos que maneja el sistema en el catálogo `limite_efluente` (ej. transforma variantes de texto como "Demanda Bioquímica" o "DBO" al estándar "DBO5" esperado por la base de datos).
+- **Estructuración:** Devuelve un arreglo asociativo limpio con parámetros y valores numéricos exactos listos para ser consumidos por el `EvaluadorCumplimiento`.
+
+### 🧪 Verificación y Calidad de Código
+- **Prueba Unitaria (Pest):** Se desarrolló la suite de pruebas en `tests/Unit/Services/OCRExtractorTest.php`.
+- **Cobertura:** Cuenta con **9 pruebas** exhaustivas que garantizan la correcta lectura de distintos formatos de PDF, el éxito en la normalización de sinónimos de parámetros químicos y el manejo de excepciones ante archivos corruptos o ilegibles.
