@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('occupancy_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('establishment_id')
-                ->constrained('establishments')
+        Schema::create('insignia_cumplimiento', function (Blueprint $table) {
+            $table->id('insignia_cumplimiento_id');
+            $table->foreignId('establecimiento_id')
+                ->constrained('establecimientos', 'id')
                 ->cascadeOnDelete();
-            $table->unsignedInteger('current_guests');
-            $table->date('date_reported');
+            $table->string('nombre');
+            $table->date('fecha_otorgamiento');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('occupancy_logs');
+        Schema::dropIfExists('insignia_cumplimiento');
     }
 };

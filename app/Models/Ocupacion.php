@@ -6,9 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class OccupancyLog extends Model
+class Ocupacion extends Model
 {
     use HasFactory;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'ocupaciones';
 
     /**
      * The attributes that are mass assignable.
@@ -16,9 +23,9 @@ class OccupancyLog extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'establishment_id',
-        'current_guests',
-        'date_reported',
+        'establecimiento_id',
+        'numero_personas',
+        'fecha_registro',
     ];
 
     /**
@@ -29,18 +36,18 @@ class OccupancyLog extends Model
     protected function casts(): array
     {
         return [
-            'current_guests' => 'integer',
-            'date_reported' => 'date',
+            'numero_personas' => 'integer',
+            'fecha_registro' => 'date',
         ];
     }
 
     /**
      * Establecimiento al que pertenece el registro.
      *
-     * @return BelongsTo<Establishment, $this>
+     * @return BelongsTo<Establecimiento, $this>
      */
-    public function establishment(): BelongsTo
+    public function establecimiento(): BelongsTo
     {
-        return $this->belongsTo(Establishment::class);
+        return $this->belongsTo(Establecimiento::class, 'establecimiento_id');
     }
 }

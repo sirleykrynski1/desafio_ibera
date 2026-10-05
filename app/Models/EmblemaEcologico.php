@@ -6,9 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class EcoBadge extends Model
+class EmblemaEcologico extends Model
 {
     use HasFactory;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'emblemas_ecologicos';
 
     /**
      * The attributes that are mass assignable.
@@ -16,9 +23,9 @@ class EcoBadge extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'establishment_id',
-        'badge_name',
-        'issued_at',
+        'establecimiento_id',
+        'nombre_emblema',
+        'fecha_otorgado',
     ];
 
     /**
@@ -29,17 +36,17 @@ class EcoBadge extends Model
     protected function casts(): array
     {
         return [
-            'issued_at' => 'datetime',
+            'fecha_otorgado' => 'datetime',
         ];
     }
 
     /**
      * Establecimiento premiado con la insignia.
      *
-     * @return BelongsTo<Establishment, $this>
+     * @return BelongsTo<Establecimiento, $this>
      */
-    public function establishment(): BelongsTo
+    public function establecimiento(): BelongsTo
     {
-        return $this->belongsTo(Establishment::class);
+        return $this->belongsTo(Establecimiento::class, 'establecimiento_id');
     }
 }

@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('maintenance_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('establishment_id')
-                ->constrained('establishments')
+        Schema::create('parametro_analisis', function (Blueprint $table) {
+            $table->id('parametro_analisis_id');
+            $table->foreignId('analisis_laboratorio_id')
+                ->constrained('analisis_laboratorio', 'analisis_laboratorio_id')
                 ->cascadeOnDelete();
-            $table->date('maintenance_date');
-            $table->string('receipt_image');
-            $table->enum('status', ['pendiente', 'aprobado', 'rechazado'])->default('pendiente');
+            $table->string('nombre');
+            $table->string('valor_medido');
+            $table->string('unidad');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('maintenance_logs');
+        Schema::dropIfExists('parametro_analisis');
     }
 };

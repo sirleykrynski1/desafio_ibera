@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('risk_evaluations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('establishment_id')
-                ->constrained('establishments')
+        Schema::create('alerta_climatica', function (Blueprint $table) {
+            $table->id('alerta_climatica_id');
+            $table->foreignId('establecimiento_id')
+                ->constrained('establecimientos', 'id')
                 ->cascadeOnDelete();
-            $table->enum('risk_level', ['verde', 'amarillo', 'rojo']);
-            $table->decimal('rain_forecast_mm', 8, 2)->default(0);
-            $table->timestamp('evaluation_date');
+            $table->date('fecha_evento');
+            $table->string('tipo');
+            $table->decimal('milimetros_lluvia', 8, 2)->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('risk_evaluations');
+        Schema::dropIfExists('alerta_climatica');
     }
 };
