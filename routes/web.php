@@ -1,36 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MantenimientoController;
 
-/*
-|--------------------------------------------------------------------------
-| RUTAS PÚBLICAS DE PROTOTIPADO Y VISUALIZACIÓN DIRECTA (Sin Middleware)
-|--------------------------------------------------------------------------
-| Permite visualizar las vistas directamente desde cualquier dominio o puerto:
-| - http://desafio_ibera.test
-| - http://localhost:8000
-| - http://127.0.0.1:8000
-*/
-
-// Página principal -> Redirige al Dashboard
+// Redirige la página principal directo al dashboard
 Route::get('/', function () {
-    return view('dashboard.index');
-})->name('inicio');
+    return redirect('/dashboard');
+});
 
-// 🐊 Dashboard Gobierno / Ambiental
+// Carga la vista que acabás de crear
 Route::get('/dashboard', function () {
-    return view('dashboard.index');
-})->name('tablero');
+    return view('dashboard');
+});
 
-// 🦦 Mis Establecimientos
-Route::get('/establishments', function () {
-    return view('establishments.index');
-})->name('establecimientos.indice');
+Route::get('/analisis', function () {
+    return view('cargar_analisis');
+});
 
-// 🐸 Registrar Mantenimiento / Limpieza
-Route::get('/maintenance/create', function () {
-    return view('maintenance.create');
-})->name('mantenimiento.crear');
-// 🐸 Recibir y guardar los datos del formulario (POST)
-Route::post('/maintenance', [MantenimientoController::class, 'store'])->name('mantenimiento.guardar');
+Route::get('/historial', function () {
+    return view('historial');
+});
