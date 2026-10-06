@@ -22,32 +22,37 @@ Permite responder de forma automática a preguntas como:
 ### 🧩 Estructura y Funcionamiento Interno
 
 #### 1. Método Público `evaluar(Establecimiento $establecimiento, array $parametros)`
-- **Entrada:** Recibe el objeto `Establecimiento` y un arreglo asociativo con las mediciones reales del laboratorio (ej. `temp` => `38`, `pH` => `7.1`, `DBO5` => `42`, etc.).
+- **Entrada:** Recibe el objeto `Establecimiento` y un arreglo asociativo con las mediciones reales del laboratorio, usando como clave el valor exacto de `limite_efluente.parametro` (ej. `Temperatura` => `38`, `pH` => `7.1`, `Demanda Bioquímica de Oxígeno (DBO5)` => `42`), tal como lo devuelve `OCRExtractor`.
 - **Proceso:**
-  - Consulta los límites según el cuerpo receptor de vuelco del establecimiento (río, laguna, pozo, etc.).
-  - Analiza cada parámetro individualmente.
-  - Agrupa los parámetros aprobados, en alerta y en incumplimiento.
-  - Calcula el porcentaje de cumplimiento `((cumplidos / total) * 100)`.
+  - Resuelve la columna de límites (`cursos_agua`, `laguna`, `conducto_pluvial`, `absorcion_suelo`) validando `tipo_destino_vuelco` contra una whitelist; si el destino es null o desconocido cae a `cursos_agua` y agrega una entrada en `advertencias`.
+  - Lee los límites desde la tabla `limite_efluente` y analiza cada parámetro que exista en la norma.
+  - Calcula el porcentaje de cumplimiento sobre los parámetros evaluables: los NDC, las celdas vacías y los parámetros ausentes de la norma quedan fuera del denominador.
   - Determina el semáforo final.
-- **Salida:** Retorna un arreglo estructurado con el estado global (`cumple`, `alerta` o `incumple`), porcentajes, desglose parámetro por parámetro y un mensaje sintético.
+- **Salida:** Arreglo con el estado global (`cumple`, `alerta` o `incumple`), porcentaje, desglose parámetro por parámetro, la lista `advertencias`, el resumen con `total_parametros` y un mensaje sintético. Cada parámetro de la salida expone `evaluable` y `ndc`.
 
-#### 2. Método Privado `obtenerLimitesDestino(?string $destino)`
-Define los umbrales normativos aplicables según la Resolución ICAA 312/21 para parámetros clave como:
-- **Temperatura:** Máx. 45 °C (alerta desde 40 °C).
-- **pH:** Rango 5.5 a 10.0 (alerta si se aproxima a los extremos).
-- **Sólidos suspendidos:** Máx. 35 mg/l (alerta desde 28 mg/l).
-- **DBO5:** Máx. 50 mg/l (alerta desde 40 mg/l).
-- **DQO:** Máx. 250 mg/l (alerta desde 200 mg/l).
-- Detergentes e Hidrocarburos.
+#### 2. Métodos Privados `resolverColumnaDestino()` y `obtenerLimitesDestino()`
+- `resolverColumnaDestino()` valida el destino contra la constante `COLUMNAS_DESTINO`; el valor del enum nunca se interpola, solo se compara con la lista y recién ahí se lee la columna.
+- `obtenerLimitesDestino()` consulta `LimiteEfluente::all()` y parsea la celda de la columna elegida junto con la unidad.
 
-#### 3. Método Privado `evaluarParametro(string $nombre, int|float $valor, array $limite)`
-- Determina la desviación individual de cada parámetro físico-químico.
-- Calcula la diferencia matemática faltante para superar un límite o el margen de seguridad disponible.
+**Parseo de las celdas (`parsearLimite()`):**
+- `NDC` (no debe contener) → no evaluable: se expone `limite_max = 0` y `ndc = true` porque lo esperado es un valor nulo o ~0, y queda fuera del denominador.
+- `Hasta 35` → máximo 35.
+- `6,5-8,5` → rango con coma decimal (mínimo 6,5 / máximo 8,5).
+- `0,5` o `2000` (número suelto) → máximo.
+- Celda vacía o texto no parseable → no evaluable sin límite.
 
-#### 4. Métodos Privados `determinarEstado()` y `generarMensaje()`
+#### 3. Banda de Alerta (`ALERTA_PORCENTAJE = 0.2`)
+- Límite de un solo lado: banda del 20% del máximo (`Hasta 35` → alerta desde 28).
+- Rango: 20% del rango en cada extremo (`6,5-8,5` → alerta fuera de 6,9-8,1).
+- La alerta solo se marca cuando el valor cumple el límite.
+
+#### 4. Método Privado `evaluarParametro()`
+- Determina si el valor respeta el mínimo/máximo, si cae en la banda de alerta y calcula la desviación individual o el margen de seguridad disponible.
+
+#### 5. Métodos Privados `determinarEstado()` y `generarMensaje()`
 Aplica la jerarquía de prioridad del semáforo ambiental:
 - 🔴 **Incumple:** Basta que 1 solo parámetro exceda el límite máximo/mínimo.
-- 🟡 **Alerta:** Ningún parámetro incumple, pero al menos 1 parámetro superó el umbral de alerta preventiva.
+- 🟡 **Alerta:** Ningún parámetro incumple, pero al menos 1 parámetro está dentro de la banda de alerta.
 - 🟢 **Cumple:** Todos los parámetros se encuentran holgadamente dentro de los márgenes permisibles.
 
 ---
@@ -55,10 +60,7 @@ Aplica la jerarquía de prioridad del semáforo ambiental:
 ### 🧪 Verificación y Calidad de Código
 
 - **Estilo de Código (Pint):** Se ejecutó Laravel Pint (`vendor/bin/pint`) asegurando el cumplimiento de los estándares estrictos de PHP 8.4 y la guía de estilo del proyecto.
-- **Prueba Unitaria (Pest):** Se desarrolló el test unitario en `tests/Unit/Services/EvaluadorCumplimientoTest.php` para validar los tres escenarios posibles:
-  1. Evaluaciones totalmente en cumplimiento (100%).
-  2. Evaluaciones con parámetros en zona de alerta (🟡).
-  3. Evaluaciones con incumplimientos (🔴).
+- **Prueba Feature (Pest):** `tests/Feature/Services/EvaluadorCumplimientoTest.php` corre contra SQLite en memoria con `RefreshDatabase` y datos creados por `LimiteEfluenteFactory`. Cubre los escenarios de cumplimiento, alerta (unilateral y banda del pH), incumplimiento, parseo de `Hasta`/número con coma decimal/NDC/celda vacía, selección de columna según destino y el fallback con advertencia cuando el destino no se conoce.
 
   ## 2. GeneradorFUR
 
