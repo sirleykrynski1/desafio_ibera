@@ -93,7 +93,29 @@ Este servicio es el encargado de leer e interpretar los informes de laboratorio 
 - **Lectura Óptica:** Procesa el texto contenido dentro de los archivos PDF de los laboratorios.
 - **Normalización de Nombres:** Mapea e iguala las variables encontradas en el documento con los nombres canónicos que maneja el sistema en el catálogo `limite_efluente` (ej. transforma variantes de texto como "Demanda Bioquímica" o "DBO" al estándar "DBO5" esperado por la base de datos).
 - **Estructuración:** Devuelve un arreglo asociativo limpio con parámetros y valores numéricos exactos listos para ser consumidos por el `EvaluadorCumplimiento`.
-
 ### 🧪 Verificación y Calidad de Código
+
 - **Prueba Unitaria (Pest):** Se desarrolló la suite de pruebas en `tests/Unit/Services/OCRExtractorTest.php`.
 - **Cobertura:** Cuenta con **9 pruebas** exhaustivas que garantizan la correcta lectura de distintos formatos de PDF, el éxito en la normalización de sinónimos de parámetros químicos y el manejo de excepciones ante archivos corruptos o ilegibles.
+
+---
+
+## 4. RegistrarAnalisisService
+
+- **Archivo:** `app/Services/RegistrarAnalisisService.php`
+- **Tipo de Servicio:** Orquestación del alta de análisis de laboratorio.
+
+### 🎯 ¿Para qué sirve?
+Unifica en un único flujo el registro de un análisis de laboratorio para la web y la API: extrae el informe PDF con `OCRExtractor`, lo evalúa contra la norma con `EvaluadorCumplimiento` y persiste todo de forma atómica.
+
+### 🧩 Estructura y Funcionamiento Interno
+- **Entrada:** `registrar(Establecimiento $establecimiento, string $rutaPdf)` recibe la ruta del informe ya almacenado en storage.
+- **Extracción:** Lee el PDF fuera de la transacción y arma las advertencias del extractor.
+- **Evaluación:** Si hubo lectura de parámetros, invoca al evaluador con los valores numéricos (clave = `limite_efluente.parametro`) y suma sus advertencias (ej. `destino_desconocido`).
+- **Persistencia (`DB::transaction`):** Crea el `AnalisisLaboratorio` con `resultado_final = 'Pendiente'`, `resultado_sugerido` del evaluador, `estado` (`evaluado` con lectura, `observado` sin ella) y `ruta_pdf`; crea los `ParametroAnalisis[]` con `detectado_por`; y sincroniza `limitesEfluentes()` por el pivote solo con los límites de los parámetros presentes en el informe y en la norma.
+- **Respaldos:** Cuando el PDF no identifica laboratorio o fecha, se registran `No determinado` y la fecha de hoy (columnas NOT NULL) y se agrega la advertencia `laboratorio_no_identificado`.
+- **Salida:** `['analisis' => AnalisisLaboratorio con parámetros y límites, 'advertencias' => list<string>]`.
+
+### 🧪 Verificación y Calidad de Código
+
+- **Prueba Feature (Pest):** `tests/Feature/Services/RegistrarAnalisisServiceTest.php` contra SQLite en memoria. Cubre el alta evaluada con sincronización del pivote, el PDF escaneado persistido como `observado` y la unión de advertencias del extractor con las del evaluador usando la fecha de hoy de respaldo.
