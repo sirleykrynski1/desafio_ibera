@@ -43,6 +43,7 @@ class PermisoVuelcoSeeder extends Seeder
                 'fecha_emision' => '2026-01-15',
                 'fecha_vencimiento' => '2027-01-15',
                 'estado' => 'Activo',
+                'estado_tramite' => 'resuelto',
             ]
         );
     }

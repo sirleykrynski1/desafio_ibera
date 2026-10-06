@@ -36,6 +36,7 @@ class PermisoVuelco extends Model
         'fecha_emision',
         'fecha_vencimiento',
         'estado',
+        'estado_tramite',
     ];
 
     /**
