@@ -34,6 +34,7 @@ class ParametroAnalisis extends Model
         'nombre',
         'valor_medido',
         'unidad',
+        'detectado_por',
     ];
 
     /**

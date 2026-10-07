@@ -10,8 +10,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "laravel/framework": "^13.8",
-        "laravel/tinker": "^3.0"
+        "barryvdh/laravel-dompdf": "^3.1",
+        "laravel/framework": "^13.17",
+        "laravel/tinker": "^3.0",
+        "smalot/pdfparser": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

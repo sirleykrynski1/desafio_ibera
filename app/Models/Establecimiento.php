@@ -27,6 +27,9 @@ class Establecimiento extends Model
     protected $fillable = [
         'user_id',
         'nombre',
+        'cuit',
+        'ubicacion',
+        'tipo_destino_vuelco',
         'rubro',
         'latitud',
         'longitud',
