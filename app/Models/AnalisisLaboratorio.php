@@ -35,7 +35,10 @@ class AnalisisLaboratorio extends Model
         'establecimiento_id',
         'fecha_muestra',
         'laboratorio',
+        'resultado_sugerido',
+        'estado',
         'resultado_final',
+        'ruta_pdf',
     ];
 
     /**

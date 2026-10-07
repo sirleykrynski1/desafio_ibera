@@ -12,15 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('analisis_laboratorio_limite_efluente', function (Blueprint $table) {
-            $table->foreignId('analisis_laboratorio_id')
-                ->constrained('analisis_laboratorio', 'analisis_laboratorio_id')
-                ->cascadeOnDelete();
-            $table->foreignId('limite_efluente_id')
-                ->constrained('limite_efluente', 'limite_efluente_id')
-                ->cascadeOnDelete();
+            $table->unsignedBigInteger('analisis_laboratorio_id');
+            $table->unsignedBigInteger('limite_efluente_id');
+
             $table->timestamps();
 
-            $table->primary(['analisis_laboratorio_id', 'limite_efluente_id'], 'analisis_limite_primary');
+            $table->foreign('analisis_laboratorio_id', 'fk_analisis_limite_analisis')
+                ->references('analisis_laboratorio_id')
+                ->on('analisis_laboratorio')
+                ->onDelete('cascade');
+
+            $table->foreign('limite_efluente_id', 'fk_analisis_limite_limite')
+                ->references('limite_efluente_id')
+                ->on('limite_efluente')
+                ->onDelete('cascade');
         });
     }
 
