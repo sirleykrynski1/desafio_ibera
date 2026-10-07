@@ -2,52 +2,48 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\Establecimiento;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 
 class GuardarAnalisisRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        if ($this->user() === null) {
+            return false;
+        }
+        if (filter_var($this->input('establecimiento_id'), FILTER_VALIDATE_INT) === false) {
+            return true;
+        }
+        Gate::authorize('update', $this->establecimientoAutorizado());
+
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
+    public function establecimientoAutorizado(): Establecimiento
+    {
+        return Establecimiento::findOrFail($this->integer('establecimiento_id'));
+    }
+
+    /** @return array<string, list<string>> */
     public function rules(): array
     {
         return [
-            'fecha_muestra' => [
-                'required',
-                'date_format:Y-m-d',
-                'before_or_equal:today',
-            ],
-            'laboratorio' => [
-                'required',
-                'string',
-                'max:255',
-            ],
+            'establecimiento_id' => ['required', 'integer'],
+            'pdf' => ['required', 'file', 'mimes:pdf', 'extensions:pdf', 'max:10240'],
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function messages(): array
     {
         return [
-            'fecha_muestra.required' => 'La fecha de la muestra es obligatoria.',
-            'fecha_muestra.date_format' => 'La fecha debe tener el formato AAAA-MM-DD.',
-            'fecha_muestra.before_or_equal' => 'La fecha de la muestra no puede ser futura.',
-            'laboratorio.required' => 'El nombre del laboratorio es obligatorio.',
-            'laboratorio.string' => 'El nombre del laboratorio debe ser texto.',
-            'laboratorio.max' => 'El nombre del laboratorio no puede superar los 255 caracteres.',
+            'establecimiento_id.required' => 'Seleccioná un establecimiento.',
+            'establecimiento_id.integer' => 'El establecimiento no es válido.',
+            'pdf.required' => 'Adjuntá el informe PDF.', 'pdf.file' => 'El informe debe ser un archivo.',
+            'pdf.mimes' => 'El informe debe ser un PDF.', 'pdf.extensions' => 'El archivo debe tener extensión .pdf.',
+            'pdf.max' => 'El PDF no puede superar los 10 MB.',
         ];
     }
 }

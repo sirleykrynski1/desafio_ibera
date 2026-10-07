@@ -2,71 +2,46 @@
 
 use App\Http\Requests\GuardarAnalisisRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 
-test('acepta la fecha actual y un laboratorio válido', function () {
-    $this->travelTo(new DateTimeImmutable('2026-10-06 12:00:00'));
+test('acepta un PDF sin exigir datos que se extraen del informe', function () {
     $request = new GuardarAnalisisRequest;
-
     $validator = Validator::make([
-        'fecha_muestra' => '2026-10-06',
-        'laboratorio' => 'laboratorio de prueba',
+        'establecimiento_id' => 1,
+        'pdf' => UploadedFile::fake()->create('informe.pdf', 100, 'application/pdf'),
     ], $request->rules(), $request->messages());
-
     expect($validator->passes())->toBeTrue();
 });
 
-test('rechaza datos incorrectos con un mensaje claro', function (
-    string $campo,
-    mixed $valor,
-    string $mensaje,
-) {
-    $this->travelTo(new DateTimeImmutable('2026-10-06 12:00:00'));
+test('rechaza archivos y establecimientos inválidos con mensaje claro', function (string $caso, string $campo, string $mensaje) {
     $request = new GuardarAnalisisRequest;
-    $datos = [
-        'fecha_muestra' => '2026-10-05',
-        'laboratorio' => 'Laboratorio de prueba',
-    ];
-    $datos[$campo] = $valor;
-
-    $validator = Validator::make(
-        $datos,
-        $request->rules(),
-        $request->messages(),
-    );
-
-    expect($validator->errors()->first($campo))->toBe($mensaje);
+    $datos = ['establecimiento_id' => 1, 'pdf' => UploadedFile::fake()->create('informe.pdf', 100, 'application/pdf')];
+    match ($caso) {
+        'sin establecimiento' => $datos['establecimiento_id'] = '',
+        'id incorrecto' => $datos['establecimiento_id'] = 'abc',
+        'sin pdf' => $datos['pdf'] = null,
+        'texto' => $datos['pdf'] = 'informe.pdf',
+        'otro formato' => $datos['pdf'] = UploadedFile::fake()->create('informe.pdf', 100, 'text/plain'),
+        'extension' => $datos['pdf'] = UploadedFile::fake()->create('informe.txt', 100, 'application/pdf'),
+        'grande' => $datos['pdf'] = UploadedFile::fake()->create('informe.pdf', 10241, 'application/pdf'),
+    };
+    $validator = Validator::make($datos, $request->rules(), $request->messages());
+    expect($validator->errors()->get($campo))->toContain($mensaje);
 })->with([
-    'fecha vacía' => [
-        'fecha_muestra', '', 'La fecha de la muestra es obligatoria.',
-    ],
-    'formato incorrecto' => [
-        'fecha_muestra', '05/10/2026', 'La fecha debe tener el formato AAAA-MM-DD.',
-    ],
-    'fecha futura' => [
-        'fecha_muestra', '2026-10-07', 'La fecha de la muestra no puede ser futura.',
-    ],
-    'laboratorio vacío' => [
-        'laboratorio', '', 'El nombre del laboratorio es obligatorio.',
-    ],
-    'laboratorio numérico' => [
-        'laboratorio', 123, 'El nombre del laboratorio debe ser texto.',
-    ],
-    'nombre demasiado largo' => [
-        'laboratorio', str_repeat('a', 256), 'El nombre del laboratorio no puede superar los 255 caracteres.',
-    ],
+    ['sin establecimiento', 'establecimiento_id', 'Seleccioná un establecimiento.'],
+    ['id incorrecto', 'establecimiento_id', 'El establecimiento no es válido.'],
+    ['sin pdf', 'pdf', 'Adjuntá el informe PDF.'],
+    ['texto', 'pdf', 'El informe debe ser un archivo.'],
+    ['otro formato', 'pdf', 'El informe debe ser un PDF.'],
+    ['extension', 'pdf', 'El archivo debe tener extensión .pdf.'],
+    ['grande', 'pdf', 'El PDF no puede superar los 10 MB.'],
 ]);
 
-test('bloquea la carga con 403 mientras no se habiliten los permisos', function () {
+test('bloquea la carga con 403 para visitantes sin sesión', function () {
     Route::post('/api/prueba-permisos-analisis', function (GuardarAnalisisRequest $request): JsonResponse {
         return response()->json(['mensaje' => 'Carga habilitada']);
     });
-
-    $response = $this->postJson('/api/prueba-permisos-analisis', [
-        'fecha_muestra' => '2026-10-05',
-        'laboratorio' => 'Laboratorio de prueba',
-    ]);
-
-    $response->assertForbidden();
+    $this->postJson('/api/prueba-permisos-analisis')->assertForbidden();
 });

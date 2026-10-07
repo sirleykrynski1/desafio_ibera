@@ -1,21 +1,29 @@
 <?php
 
+use App\Http\Controllers\AnalisisController;
+use App\Http\Controllers\EstablecimientoController;
+use App\Http\Controllers\PermisoVuelcoController;
+use App\Http\Controllers\SesionController;
 use Illuminate\Support\Facades\Route;
 
-// Redirige la página principal directo al dashboard
-Route::get('/', function () {
-    return redirect('/dashboard');
+Route::redirect('/', '/dashboard');
+Route::middleware('guest')->group(function (): void {
+    Route::get('/login', [SesionController::class, 'create'])->name('login');
+    Route::post('/login', [SesionController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
+    Route::post('/registro', [SesionController::class, 'register'])->middleware('throttle:6,1')->name('registro');
 });
-
-// Carga la vista que acabás de crear
-Route::get('/dashboard', function () {
-    return view('dashboard');
-});
-
-Route::get('/analisis', function () {
-    return view('cargar_analisis');
-});
-
-Route::get('/historial', function () {
-    return view('historial');
+Route::middleware('auth')->group(function (): void {
+    Route::post('/logout', [SesionController::class, 'destroy'])->name('logout');
+    Route::redirect('/dashboard', '/establecimientos')->name('dashboard');
+    Route::get('/establecimientos', [EstablecimientoController::class, 'index'])->name('establecimientos.indice');
+    Route::get('/establecimientos/crear', [EstablecimientoController::class, 'create'])->name('establecimientos.crear');
+    Route::post('/establecimientos', [EstablecimientoController::class, 'store'])->name('establecimientos.guardar');
+    Route::get('/establecimientos/{establecimiento}', [EstablecimientoController::class, 'show'])->name('establecimientos.mostrar');
+    Route::get('/establecimientos/{establecimiento}/editar', [EstablecimientoController::class, 'edit'])->name('establecimientos.editar');
+    Route::put('/establecimientos/{establecimiento}', [EstablecimientoController::class, 'update'])->name('establecimientos.actualizar');
+    Route::post('/establecimientos/{establecimiento}/permiso', [PermisoVuelcoController::class, 'store'])->name('permisos.guardar');
+    Route::get('/analisis', [AnalisisController::class, 'create'])->name('analisis.crear');
+    Route::post('/analisis', [AnalisisController::class, 'store'])->middleware('throttle:10,1')->name('analisis.guardar');
+    Route::get('/historial', [AnalisisController::class, 'index'])->name('analisis.indice');
+    Route::get('/analisis/{analisis}', [AnalisisController::class, 'show'])->name('analisis.mostrar');
 });
