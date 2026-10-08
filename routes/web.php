@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertaClimaticaController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Controllers\ClimaEstablecimientoController;
 use App\Http\Controllers\EstablecimientoController;
@@ -16,6 +17,8 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/registro', [SesionController::class, 'register'])->middleware('throttle:6,1')->name('registro');
 });
 Route::middleware('auth')->group(function (): void {
+    Route::get('/alertas-climaticas', [AlertaClimaticaController::class, 'index'])->name('alertas.indice');
+    Route::patch('/alertas-climaticas/{alerta}', [AlertaClimaticaController::class, 'update'])->name('alertas.revisar');
     Route::post('/logout', [SesionController::class, 'destroy'])->name('logout');
     Route::get('/dashboard', [PanelGestionController::class, 'show'])->name('dashboard');
     Route::get('/gestion', [PanelGestionController::class, 'index'])->name('gestion');

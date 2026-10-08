@@ -1,8 +1,11 @@
 <?php
 
+use App\Jobs\ActualizarAlertaClimatica;
+use App\Models\Establecimiento;
 use App\Services\ClimateApiClient;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Validator;
 
 Artisan::command('inspire', function () {
@@ -33,3 +36,25 @@ Artisan::command('clima:consultar {latitud} {longitud}', function (ClimateApiCli
 
     return 0;
 })->purpose('Consultar la API climática sin guardar datos');
+
+Artisan::command('clima:actualizar', function (): int {
+    $fallos = 0;
+    $consultados = 0;
+    $ciclo = (string) intdiv(now()->timestamp, 6 * 60 * 60);
+    foreach (Establecimiento::query()->select('id')->lazyById(100) as $hotel) {
+        $consultados++;
+        try {
+            if (! ActualizarAlertaClimatica::dispatchSync($hotel->id, $ciclo)) {
+                $fallos++;
+            }
+        } catch (Throwable $error) {
+            report($error);
+            $fallos++;
+        }
+    }
+    $this->info("Establecimientos procesados: {$consultados}. Consultas fallidas: {$fallos}.");
+
+    return $fallos > 0 ? 1 : 0;
+})->purpose('Consultar Python y guardar alertas sin duplicar el ciclo de seis horas');
+
+Schedule::command('clima:actualizar')->everySixHours()->timezone('UTC')->withoutOverlapping();

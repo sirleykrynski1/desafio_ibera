@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <h1 class="h3">Panel de gestión</h1>
+<p><a href="{{ route('alertas.indice') }}">Historial de alertas climáticas</a></p>
 <p>Análisis pendientes de revisión, comenzando por los más antiguos. Consultá el clima del establecimiento para ayudar a priorizar inspecciones.</p>
 <a href="{{ route('establecimientos.indice') }}">Consultar establecimientos y permisos</a>
 <div class="table-responsive"><table class="table">
