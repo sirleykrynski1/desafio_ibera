@@ -1,7 +1,8 @@
 <?php
 
-test('the application returns a successful response', function () {
+test('la página inicial ofrece acceso a ambos portales', function () {
+    $this->withoutVite();
     $response = $this->get('/');
 
-    $response->assertStatus(200);
+    $response->assertOk()->assertSee('Acceso a establecimientos')->assertSee('Acceso a gestión');
 });

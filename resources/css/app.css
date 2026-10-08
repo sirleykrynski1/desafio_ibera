@@ -8,3 +8,8 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 @import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Bootstrap usa collapse para el despliegue; Tailwind también lo usa para ocultar. */
+.navbar-collapse {
+    visibility: visible;
+}

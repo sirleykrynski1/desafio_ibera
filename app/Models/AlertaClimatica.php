@@ -34,6 +34,10 @@ class AlertaClimatica extends Model
         'fecha_evento',
         'tipo',
         'milimetros_lluvia',
+        'clave_consulta',
+        'periodo_hasta',
+        'consultado_en',
+        'detalle',
     ];
 
     /**
@@ -46,6 +50,10 @@ class AlertaClimatica extends Model
         return [
             'fecha_evento' => 'date',
             'milimetros_lluvia' => 'decimal:2',
+            'periodo_hasta' => 'date',
+            'consultado_en' => 'datetime',
+            'detalle' => 'array',
+            'revisada_en' => 'datetime',
         ];
     }
 

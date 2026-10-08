@@ -50,14 +50,21 @@ class AnalisisLaboratorio extends Model
     {
         return [
             'fecha_muestra' => 'date',
+            'revisado_en' => 'datetime',
         ];
     }
 
     /**
-     * Establecimiento evaluado en el análisis de laboratorio.
+     * Usuario que registró el dictamen final.
      *
-     * @return BelongsTo<Establecimiento, $this>
+     * @return BelongsTo<User, $this>
      */
+    public function revisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'revisado_por');
+    }
+
+    /** @return BelongsTo<Establecimiento, $this> */
     public function establecimiento(): BelongsTo
     {
         return $this->belongsTo(Establecimiento::class, 'establecimiento_id');
