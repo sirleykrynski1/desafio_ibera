@@ -28,7 +28,19 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirección para el Gobierno / Inspectores
+    if ($rol === 'admin_gobierno' || $rol === 'inspector') {
+        return redirect()->intended(route('analisis.cargar'));
+    }
+
+    // Redirección para los dueños de Establecimientos
+    if ($rol === 'establecimiento') {
+        // Reemplaza 'dashboard' por el nombre de la ruta principal del establecimiento si creaste una distinta
+        return redirect()->intended(route('dashboard')); 
+    }
+
+    // Fallback por defecto por si un usuario no tiene rol asignado
+    return redirect()->intended(route('home'));
     }
 
     /**
