@@ -1,7 +1,8 @@
 <?php
 
-test('the home page redirects to the dashboard', function () {
+test('la página inicial ofrece acceso a ambos portales', function () {
+    $this->withoutVite();
     $response = $this->get('/');
 
-    $response->assertRedirect('/dashboard');
+    $response->assertOk()->assertSee('Acceso a establecimientos')->assertSee('Acceso a gestión');
 });

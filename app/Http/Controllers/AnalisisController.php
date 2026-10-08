@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
 class AnalisisController extends Controller
@@ -51,10 +52,21 @@ class AnalisisController extends Controller
             ->with('advertencias', $resultado['advertencias']);
     }
 
+    public function download(AnalisisLaboratorio $analisis): BinaryFileResponse
+    {
+        Gate::authorize('view', $analisis->establecimiento);
+        $raiz = realpath(Storage::disk('local')->path('analisis'));
+        $ruta = $analisis->ruta_pdf ? realpath($analisis->ruta_pdf) : false;
+        abort_unless($raiz !== false && $ruta !== false && is_file($ruta)
+            && str_starts_with($ruta, $raiz.DIRECTORY_SEPARATOR), 404);
+
+        return response()->download($ruta, 'analisis-'.$analisis->getKey().'.pdf', ['Content-Type' => 'application/pdf']);
+    }
+
     public function show(AnalisisLaboratorio $analisis): View
     {
         Gate::authorize('view', $analisis->establecimiento);
-        $analisis->load('parametros');
+        $analisis->load(['parametros', 'revisor']);
 
         return view('analisis_detalle', compact('analisis'));
     }

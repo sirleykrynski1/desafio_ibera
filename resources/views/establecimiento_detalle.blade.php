@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <h1 class="h3">{{ $establecimiento->nombre }}</h1>
+<p><a href="{{ route('establecimientos.clima', $establecimiento) }}">Consultar alerta climática</a></p>
 <p>{{ $establecimiento->ubicacion }} · Destino: {{ $establecimiento->tipo_destino_vuelco }}</p>
 @can('update', $establecimiento)
 <a class="btn btn-outline-success mb-3" href="{{ route('establecimientos.editar', $establecimiento) }}">Editar</a>

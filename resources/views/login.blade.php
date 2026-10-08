@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('content')
-<h1 class="h3">Ingresar</h1>
+<h1 class="h3">{{ request('portal') === 'gestion' ? 'Ingresar a gestión' : 'Ingresar' }}</h1>
+<p>El panel disponible depende del rol de tu cuenta. Las cuentas de gestión son asignadas por el equipo administrador.</p>
 <form action="{{ route('login.store') }}" method="POST" class="card card-body mb-4">
     @csrf
     <label for="email">Correo</label>

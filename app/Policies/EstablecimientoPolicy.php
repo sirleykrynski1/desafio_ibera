@@ -35,6 +35,11 @@ class EstablecimientoPolicy
         return $this->esGobierno($user);
     }
 
+    public function revisarAnalisis(User $user, Establecimiento $establecimiento): bool
+    {
+        return $this->esGobierno($user);
+    }
+
     private function esGobierno(User $user): bool
     {
         return in_array($user->rol, ['inspector', 'admin_gobierno'], true);
