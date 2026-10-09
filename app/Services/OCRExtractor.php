@@ -34,7 +34,7 @@ class OCRExtractor
     private const PARAMETROS = [
         'Temperatura' => [
             'unidad' => '°C',
-            'etiquetas' => ['temperatura'],
+            'etiquetas' => ['temperatura', 'teperatura'],
         ],
         'pH' => [
             'unidad' => 'UpH',
@@ -86,6 +86,8 @@ class OCRExtractor
         'fecha de análisis',
         'fecha de analisis',
         'fecha',
+        'fecha ingreso muestra',
+        'fecha analisis',
     ];
 
     /**

@@ -11,7 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'nombre', 'apellido', 'email', 'password'])]
+/**
+ * @property-read int|null $establecimientos_count
+ */
+#[Fillable(['nombre', 'apellido', 'email', 'password', 'dni', 'direccion', 'telefono'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -26,6 +29,24 @@ class User extends Authenticatable
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Relación: un propietario puede tener uno o varios establecimientos.
+     *
+     * @return HasMany<Establecimiento, $this>
+     */
+    public function establecimientos(): HasMany
+    {
+        return $this->hasMany(Establecimiento::class);
+    }
+
+    /**
+     * Indica si el usuario tiene uno de los roles indicados.
+     */
+    public function es(string ...$roles): bool
+    {
+        return in_array($this->rol, $roles, true);
+    }
 
     /**
      * Get the attributes that should be cast.
