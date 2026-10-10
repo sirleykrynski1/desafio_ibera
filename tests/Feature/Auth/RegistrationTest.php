@@ -22,4 +22,5 @@ test('new users can register', function () {
 
     $user = User::where('email', 'test@example.com')->firstOrFail();
     expect($user->rol)->toBe('propietario');
+    expect($user->name)->toBe('Test User');
 });
