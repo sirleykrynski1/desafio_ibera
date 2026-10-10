@@ -1,0 +1,19 @@
+{
+    "version": "1",
+    "estado": "disponible",
+    "ubicacion": {"latitud": -28.54, "longitud": -57.17},
+    "fuente": "open-meteo",
+    "consultado_en": "2026-10-04T13:00:00+00:00",
+    "periodo": {
+        "desde": "2026-10-04",
+        "hasta": "2026-10-06",
+        "zona_horaria": "America/Argentina/Buenos_Aires"
+    },
+    "precipitacion_acumulada_mm": 52.4,
+    "alerta": {
+        "activa": true,
+        "codigo": "PRECIPITACION_ACUMULADA_ALTA",
+        "motivos": ["La precipitación acumulada alcanza o supera el umbral preventivo."]
+    },
+    "version_reglas": "clima-v1"
+}

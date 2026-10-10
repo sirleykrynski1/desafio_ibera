@@ -1,5 +1,14 @@
 <?php
 
+use App\Http\Controllers\AlertaClimaticaController;
+use App\Http\Controllers\AnalisisController;
+use App\Http\Controllers\ClimaEstablecimientoController;
+use App\Http\Controllers\EstablecimientoController;
+use App\Http\Controllers\PanelGestionController;
+use App\Http\Controllers\PermisoVuelcoController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RevisionAnalisisController;
+use App\Http\Controllers\SesionController;
 use Illuminate\Support\Facades\Route;
 
 // Redirige la página principal directo al dashboard

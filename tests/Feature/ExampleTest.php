@@ -1,7 +1,7 @@
 <?php
 
-test('the application returns a successful response', function () {
+it('returns a successful response', function () {
     $response = $this->get('/');
 
-    $response->assertStatus(200);
+    $response->assertOk()->assertSee('Acceso a establecimientos')->assertSee('Acceso a gestión');
 });

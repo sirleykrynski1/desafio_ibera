@@ -48,6 +48,19 @@
                 <small class="text-muted">Puede haber saturación de pozos absorbentes.</small>
             </div>
         </div>
+
+        <!-- Tarjeta: Subir Análisis -->
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h5 class="card-title fw-bold mb-1">Subir Análisis de Laboratorio</h5>
+                    <p class="text-muted mb-0 small">Cargá el informe PDF de tu establecimiento para que sea evaluado.</p>
+                </div>
+                <a href="{{ route('analisis.crear') }}" class="btn btn-success btn-lg px-4" id="btn-subir-analisis">
+                    📄 Subir Análisis
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Malla Inferior: Últimos Análisis + Banner promocional Iberá -->
