@@ -70,7 +70,7 @@
             <div class="card border-0 shadow-sm rounded-3 p-4 bg-white h-100">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="fw-bold text-dark mb-0">Últimos análisis</h5>
-                    <a href="{{ route('analisis.index') }}" class="text-success text-decoration-none small fw-bold">Ver historial completo →</a>
+                    <a href="{{ route('analisis.indice') }}" class="text-success text-decoration-none small fw-bold">Ver historial completo →</a>
                 </div>
 
                 <div class="table-responsive">
