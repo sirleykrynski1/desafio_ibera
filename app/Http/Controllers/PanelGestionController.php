@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnalisisLaboratorio;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -16,12 +15,5 @@ class PanelGestionController extends Controller
             ->where('resultado_final', 'Pendiente')->orderBy('created_at')->paginate(15);
 
         return view('gestion', compact('analisis'));
-    }
-
-    public function show(Request $request): RedirectResponse
-    {
-        abort_unless(in_array($request->user()->rol, ['propietario', 'inspector', 'admin_gobierno'], true), 403);
-
-        return to_route($request->user()->rol === 'propietario' ? 'establecimientos.indice' : 'gestion');
     }
 }

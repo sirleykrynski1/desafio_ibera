@@ -19,13 +19,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @var array<string, string> */
-    protected $attributes = ['rol' => 'propietario'];
-
-    /** @return HasMany<Establecimiento, $this> */
-    public function establecimientos(): HasMany
-    {
-        return $this->hasMany(Establecimiento::class);
-    }
+    protected $attributes = ['rol' => 'propietario']; // Por defecto, cuando se crea un usuario es propietario.
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;

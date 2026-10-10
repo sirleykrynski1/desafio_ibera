@@ -28,19 +28,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirección para el Gobierno / Inspectores
-    if ($rol === 'admin_gobierno' || $rol === 'inspector') {
-        return redirect()->intended(route('analisis.cargar'));
-    }
+        $rol = $request->user()->rol;
 
-    // Redirección para los dueños de Establecimientos
-    if ($rol === 'establecimiento') {
-        // Reemplaza 'dashboard' por el nombre de la ruta principal del establecimiento si creaste una distinta
-        return redirect()->intended(route('dashboard')); 
-    }
+        if (in_array($rol, ['admin_gobierno', 'inspector'], true)) {
+            return redirect()->intended(route('gestion'));
+        }
 
-    // Fallback por defecto por si un usuario no tiene rol asignado
-    return redirect()->intended(route('home'));
+        return redirect()->intended(route('dashboard'));
     }
 
     /**
