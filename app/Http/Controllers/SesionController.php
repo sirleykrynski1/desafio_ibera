@@ -24,7 +24,7 @@ class SesionController extends Controller
         }
         $request->session()->regenerate();
 
-        return redirect()->intended(route(in_array($request->user()->rol, ['inspector', 'admin_gobierno'], true) ? 'gestion' : 'establecimientos.indice'));
+        return redirect()->intended(route(in_array($request->user()->rol, ['inspector', 'admin_gobierno'], true) ? 'gestion' : 'dashboard'));
     }
 
     public function register(Request $request): RedirectResponse

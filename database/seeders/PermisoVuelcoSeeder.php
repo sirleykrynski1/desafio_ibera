@@ -17,11 +17,11 @@ class PermisoVuelcoSeeder extends Seeder
         $establecimiento = Establecimiento::first();
 
         if (! $establecimiento) {
-            $user = User::first() ?? User::create([
+            $user = User::where('email', 'propietario@ibera.gob.ar')->first() ?? User::create([
                 'nombre' => 'Carlos',
                 'apellido' => 'Gómez',
                 'email' => 'propietario@ibera.gob.ar',
-                'password' => bcrypt('password'),
+                'password' => 'password',
                 'rol' => 'propietario',
             ]);
 

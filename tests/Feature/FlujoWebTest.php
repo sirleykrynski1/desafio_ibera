@@ -54,7 +54,7 @@ test('permite iniciar sesión y rechaza contraseñas incorrectas', function () {
     $user = User::factory()->create();
     $this->post('/login', ['email' => $user->email, 'password' => 'incorrecta'])->assertSessionHasErrors('email');
     $this->assertGuest();
-    $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertRedirect(route('establecimientos.indice'));
+    $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertRedirect(route('dashboard'));
     $this->assertAuthenticatedAs($user);
 });
 
