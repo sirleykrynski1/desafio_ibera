@@ -42,7 +42,7 @@ class OCRExtractor
         ],
         'Sólidos Sedimentables (2 horas)' => [
             'unidad' => 'ml/lts',
-            'etiquetas' => ['sólidos sedimentables', 'solidos sedimentables', 'sólidos en suspensión', 'solidos en suspension', 'SS'],
+            'etiquetas' => ['sólidos sedimentables', 'Sólidos Sedimentables 2 horas', 'solidos sedimentables', 'sólidos en suspensión', 'solidos en suspension', 'SS'],
         ],
         'Demanda Bioquímica de Oxígeno (DBO5)' => [
             'unidad' => 'mg/lts',
