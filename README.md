@@ -4,7 +4,7 @@ Aplicación Laravel con vistas Blade para propietarios e inspectores, carga priv
 
 ## Preparar una copia nueva
 
-Requisitos: PHP 8.4 con las extensiones exigidas por Composer, Composer, Node.js compatible con Vite 8, MySQL y Python 3.12. El entorno local verificado utiliza MySQL 8.4. Las versiones PHP están fijadas en `composer.lock`; Python aún usa `requirements.text` sin versiones fijadas.
+Requisitos: PHP 8.4 con las extensiones exigidas por Composer, Composer, Node.js compatible con Vite 8, MySQL y Python 3.12. El entorno local verificado utiliza MySQL 8.4. Las versiones PHP están fijadas en `composer.lock`. El archivo `requirements.text` fue eliminado; las dependencias Python se indican abajo y aún no tienen versiones fijadas para reproducir una instalación nueva.
 
 ```powershell
 composer install
@@ -26,7 +26,7 @@ Preparar Python en un entorno local aislado:
 
 ```powershell
 py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.text
+.\.venv\Scripts\python.exe -m pip install fastapi uvicorn pandas requests
 ```
 
 ## Ejecutar localmente
@@ -74,4 +74,4 @@ La suite habitual usa SQLite en memoria y respuestas HTTP controladas. Dos prueb
 
 Las operaciones de negocio usan rutas web con sesión; no hay una API REST de negocio paralela bajo `/api`. La alerta climática es preventiva, no un dictamen legal ni un modelo entrenado de inteligencia artificial. El umbral climático debe validarse con especialistas.
 
-Antes de entregar: integrar las últimas pantallas y cambios de autenticación/OCR del equipo y completar la aceptación conjunta. Si se requiere hosting, también configurar los procesos persistentes y el programador. El PDF escaneado y los cambios de seguridad de Catalina deben comprobarse cuando se incorporen.
+El 10 de octubre se integró main en dev/melina y se corrigió la compatibilidad de usuarios y pruebas. La suite integrada aprobó 152 pruebas (558 comprobaciones), con 3 optativas omitidas. El dashboard incluido por el equipo todavía muestra datos fijos de demostración: no deben presentarse como cumplimiento, permisos o alertas reales. Completar la aceptación conjunta con las pantallas definitivas. Si se requiere hosting, también configurar procesos persistentes y programador. El extractor actual trabaja sobre texto del PDF; sus nuevas etiquetas no incorporan reconocimiento de imágenes escaneadas.

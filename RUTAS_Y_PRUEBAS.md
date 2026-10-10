@@ -1,6 +1,6 @@
 # Rutas y pruebas — entrega de Persona 2
 
-Estado verificado contra la rama `dev/melina`, 9 de octubre de 2026. El PR #4 ya fue integrado en `main`. Este documento describe el código disponible; debe revisarse cuando se integre la autenticación/OCR o el frontend de otras ramas.
+Estado verificado contra la rama `dev/melina`, 10 de octubre de 2026, después del merge 42f6e8e y sus correcciones de compatibilidad. Los cambios del PR #4 y los cambios de Cata publicados en main ya están integrados localmente. Este documento describe el código disponible, no futuras pantallas o funcionalidades del equipo.
 
 ## Arquitectura acordada
 
@@ -24,7 +24,7 @@ Todas las mutaciones web necesitan cookie de sesión y token CSRF, incluso login
 | POST | `/login` | Invitado, email y contraseña; 6 intentos/minuto | 302 |
 | POST | `/registro` | Invitado; crea exclusivamente propietario; 6/minuto | 302 |
 | POST | `/logout` | Usuario autenticado | 302 |
-| GET | `/dashboard` | Redirige según rol | 302 |
+| GET | `/dashboard` | Sesión; panel con contenido fijo de demostración | 200 HTML |
 | GET | `/gestion` | Inspector/admin_gobierno, análisis pendientes | 200 HTML |
 | GET | `/establecimientos` | Propietario ve los suyos; gobierno ve todos | 200 HTML |
 | GET | `/establecimientos/crear` | Propietario, formulario | 200 HTML |
@@ -42,9 +42,20 @@ Todas las mutaciones web necesitan cookie de sesión y token CSRF, incluso login
 | POST | `/analisis/{id}/revision` | Inspector/admin_gobierno, dictamen único | 302 |
 | GET | `/alertas-climaticas` | Gobierno; filtro `estado=pendientes/revisadas/todas` | 200 HTML |
 | PATCH | `/alertas-climaticas/{id}` | Gobierno, registrar revisión de detección | 302 |
+| GET | `/profile` | Sesión, formulario de perfil | 200 HTML |
+| PATCH | `/profile` | Sesión, actualizar nombre/apellido/email | 302 |
+| DELETE | `/profile` | Sesión y contraseña actual, eliminación de cuenta incorporada por el equipo | 302 |
+| GET / POST | `/forgot-password` | Invitado, pedir recuperación de contraseña | 200 HTML / 302 |
+| GET | `/reset-password/{token}` | Invitado, formulario de nueva contraseña | 200 HTML |
+| POST | `/reset-password` | Invitado, validar token y cambiar contraseña | 302 |
+| GET | `/verify-email` | Sesión, pantalla de verificación | 200 HTML / 302 |
+| GET | `/verify-email/{id}/{hash}` | Sesión, enlace firmado, 6/minuto | 302 |
+| POST | `/email/verification-notification` | Sesión, solicitar enlace, 6/minuto | 302 |
+| GET / POST | `/confirm-password` | Sesión, confirmar contraseña | 200 HTML / 302 |
+| PUT | `/password` | Sesión, contraseña actual y nueva confirmada | 302 |
 | GET | Python: `/api/v1/alerta-climatica` | Coordenadas válidas; servicio local | 200 JSON / 503 |
 
-No hay eliminación de establecimientos ni de análisis en este flujo. Las rutas por ID ocultan recursos de otro propietario con 404. Gobierno puede consultar establecimientos, pero no editarlos por esa ruta.
+No hay eliminación de establecimientos ni de análisis en este flujo. Las rutas por ID ocultan recursos de otro propietario con 404. Gobierno puede consultar establecimientos, pero no editarlos por esa ruta. El login actual sigue usando SesionController: envía gobierno a `/gestion` y propietarios a `/dashboard`, salvo una dirección pendiente en la sesión. La existencia de los controladores de Breeze no significa que todas sus vistas estén conectadas. Para enviar correos reales hace falta configurar el transporte; las pruebas usan notificaciones controladas.
 
 ## Datos de entrada
 
@@ -55,7 +66,7 @@ No hay eliminación de establecimientos ni de análisis en este flujo. Las rutas
 - **Dictamen:** `resultado_final` (`Aprobado` o `Rechazado`) y `observaciones_revision` obligatorias, máximo 2000 caracteres. El servidor asigna autor y fecha. No admite sobrescribir una revisión ya cerrada.
 - **Clima Python:** query `latitud` y `longitud` numéricas y finitas. Puede responder 503 si no obtiene un pronóstico completo. La página Laravel sigue mostrando 200 HTML con la indisponibilidad visible.
 
-Un PDF válido pero sin texto legible se registra como `observado` con advertencias y necesita revisión humana. No es un error de validación 422. La extracción de PDF escaneado y las mejoras de autenticación están siendo trabajadas por Catalina.
+Un PDF válido pero sin texto legible se registra como `observado` con advertencias y necesita revisión humana. No es un error de validación 422. Los cambios integrados del extractor amplían etiquetas de texto; no incorporan un motor de OCR para imágenes escaneadas.
 
 ## Errores y límites
 
