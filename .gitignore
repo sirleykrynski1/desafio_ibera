@@ -21,6 +21,9 @@
 /storage/*.key
 /storage/pail
 /vendor
+/.venv
+__pycache__/
+*.pyc
 _ide_helper.php
 Homestead.json
 Homestead.yaml

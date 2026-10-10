@@ -1,0 +1,1678 @@
+{
+  "info": {
+    "name": "Desafío Iberá · Web con sesión y clima",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "41 solicitudes. Leer RUTAS_Y_PRUEBAS.md. Carpetas 01–03 se ejecutan en orden con cuentas de prueba y PDF seleccionado; 04–05 son manuales y opcionales. Las acciones guardan datos ficticios en la base elegida. No ejecutar toda la colección indiscriminadamente. Autenticación por cookies + CSRF; páginas HTML y redirecciones, no API REST de negocio. No hay credenciales incluidas."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "python_url",
+      "value": "http://127.0.0.1:8001",
+      "type": "string"
+    },
+    {
+      "key": "csrf_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establecimiento_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "analisis_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alerta_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "propietario_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "propietario_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inspector_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inspector_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "nuevo_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "nueva_password",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const html = pm.response.text();",
+          "const token = html.match(/name=\"_token\"\\s+value=\"([^\"]+)\"/);",
+          "if (token) pm.collectionVariables.set('csrf_token', token[1]);"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 · Público y errores sin sesión",
+      "item": [
+        {
+          "name": "01 Inicio público",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set('csrf_token', '');",
+                  "pm.collectionVariables.set('establecimiento_id', '');",
+                  "pm.collectionVariables.set('analisis_id', '');"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Estado API",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/estado",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('API activa', () => pm.expect(pm.response.json().mensaje).to.equal('La API de Desafío Iberá está funcionando'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 Establecimientos sin sesión → 401",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos",
+            "description": "Vaciar las cookies de este servidor antes de comenzar la colección."
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 401', () => pm.expect(pm.response.code).to.be.oneOf([401]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Ruta inexistente → 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/ruta-inexistente-postman",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 Método no permitido → 405",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/estado",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 405', () => pm.expect(pm.response.code).to.be.oneOf([405]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 Obtener sesión y CSRF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/login",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 Login sin CSRF → 419",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/login",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "{{propietario_email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{propietario_password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 419', () => pm.expect(pm.response.code).to.be.oneOf([419]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 · Propietario (ejecutar en orden)",
+      "item": [
+        {
+          "name": "08 Iniciar sesión propietario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/login",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "{{propietario_email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{propietario_password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 Listar establecimientos y renovar CSRF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 Crear establecimiento ficticio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "nombre",
+                  "value": "Hotel de prueba Postman",
+                  "type": "text"
+                },
+                {
+                  "key": "rubro",
+                  "value": "hotel",
+                  "type": "text"
+                },
+                {
+                  "key": "ubicacion",
+                  "value": "Dirección ficticia, Colonia Carlos Pellegrini",
+                  "type": "text"
+                },
+                {
+                  "key": "tipo_destino_vuelco",
+                  "value": "cursos_agua",
+                  "type": "text"
+                },
+                {
+                  "key": "latitud",
+                  "value": "-28.54",
+                  "type": "text"
+                },
+                {
+                  "key": "longitud",
+                  "value": "-57.17",
+                  "type": "text"
+                },
+                {
+                  "key": "capacidad_maxima",
+                  "value": "30",
+                  "type": "text"
+                },
+                {
+                  "key": "capacidad_biodigestor",
+                  "value": "3000",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set('establecimiento_id', '');"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "if (pm.response.code === 302) { const m = (pm.response.headers.get('Location') || '').match(/\\/establecimientos\\/(\\d+)(?:\\?|$)/); pm.test('Se creó el recurso', () => pm.expect(m).not.to.equal(null)); if (m) pm.collectionVariables.set('establecimiento_id', m[1]); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 Ver establecimiento creado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos/{{establecimiento_id}}",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 Formulario de edición",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos/{{establecimiento_id}}/editar",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 Actualizar establecimiento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos/{{establecimiento_id}}",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "nombre",
+                  "value": "Hotel de prueba actualizado",
+                  "type": "text"
+                },
+                {
+                  "key": "rubro",
+                  "value": "hotel",
+                  "type": "text"
+                },
+                {
+                  "key": "ubicacion",
+                  "value": "Dirección ficticia, Colonia Carlos Pellegrini",
+                  "type": "text"
+                },
+                {
+                  "key": "tipo_destino_vuelco",
+                  "value": "cursos_agua",
+                  "type": "text"
+                },
+                {
+                  "key": "latitud",
+                  "value": "-28.54",
+                  "type": "text"
+                },
+                {
+                  "key": "longitud",
+                  "value": "-57.17",
+                  "type": "text"
+                },
+                {
+                  "key": "capacidad_maxima",
+                  "value": "40",
+                  "type": "text"
+                },
+                {
+                  "key": "capacidad_biodigestor",
+                  "value": "3000",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 Validación de coordenadas → 422",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos/{{establecimiento_id}}",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "nombre",
+                  "value": "Hotel de prueba Postman",
+                  "type": "text"
+                },
+                {
+                  "key": "rubro",
+                  "value": "hotel",
+                  "type": "text"
+                },
+                {
+                  "key": "ubicacion",
+                  "value": "Dirección ficticia, Colonia Carlos Pellegrini",
+                  "type": "text"
+                },
+                {
+                  "key": "tipo_destino_vuelco",
+                  "value": "cursos_agua",
+                  "type": "text"
+                },
+                {
+                  "key": "latitud",
+                  "value": "100",
+                  "type": "text"
+                },
+                {
+                  "key": "longitud",
+                  "value": "-57.17",
+                  "type": "text"
+                },
+                {
+                  "key": "capacidad_maxima",
+                  "value": "30",
+                  "type": "text"
+                },
+                {
+                  "key": "capacidad_biodigestor",
+                  "value": "3000",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 422', () => pm.expect(pm.response.code).to.be.oneOf([422]));",
+                  "pm.test('Error de latitud', () => pm.expect(pm.response.json().errors).to.have.property('latitud'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15 Gestión prohibida al propietario → 403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/gestion",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 403', () => pm.expect(pm.response.code).to.be.oneOf([403]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16 Establecimiento inexistente → 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos/2147483647",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "17 Formulario de análisis",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/analisis",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "18 Análisis sin PDF → 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/analisis",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "establecimiento_id",
+                  "value": "{{establecimiento_id}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 422', () => pm.expect(pm.response.code).to.be.oneOf([422]));",
+                  "pm.test('Error de PDF', () => pm.expect(pm.response.json().errors).to.have.property('pdf'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "19 Subir PDF ficticio (seleccionar archivo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/analisis",
+            "description": "Antes de ejecutar, Body > form-data > pdf: seleccionar un informe PDF de prueba, máximo 10 MB. Crea un análisis pendiente, aunque la extracción no encuentre parámetros.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "establecimiento_id",
+                  "value": "{{establecimiento_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "pdf",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set('analisis_id', '');"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "if (pm.response.code === 302) { const m = (pm.response.headers.get('Location') || '').match(/\\/analisis\\/(\\d+)(?:\\?|$)/); pm.test('Se creó el recurso', () => pm.expect(m).not.to.equal(null)); if (m) pm.collectionVariables.set('analisis_id', m[1]); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "20 Ver análisis pendiente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/analisis/{{analisis_id}}",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Dictamen pendiente', () => pm.expect(pm.response.text()).to.include('Pendiente'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "21 Descargar PDF privado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/analisis/{{analisis_id}}/pdf",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Es un PDF', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "22 Historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/historial",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "23 Clima del establecimiento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos/{{establecimiento_id}}/clima",
+            "description": "La página puede indicar datos no disponibles si Python/Open-Meteo no responde. HTTP 200 no certifica que exista pronóstico."
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "24 Propietario no puede dictaminar → 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/analisis/{{analisis_id}}/revision",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "resultado_final",
+                  "value": "Aprobado",
+                  "type": "text"
+                },
+                {
+                  "key": "observaciones_revision",
+                  "value": "PRUEBA FICTICIA para verificar el flujo de revisión.",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 403', () => pm.expect(pm.response.code).to.be.oneOf([403]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "25 Cerrar sesión de propietario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/logout",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 · Inspector (requiere cuenta del equipo)",
+      "item": [
+        {
+          "name": "26 Nueva sesión y CSRF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/login",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "27 Iniciar sesión inspector",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/login",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "{{inspector_email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{inspector_password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "28 Panel de gestión y nuevo CSRF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/gestion",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "29 Guardar permiso ficticio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/establecimientos/{{establecimiento_id}}/permiso",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "numero_expediente",
+                  "value": "DEMO-POSTMAN-001",
+                  "type": "text"
+                },
+                {
+                  "key": "fecha_emision",
+                  "value": "2026-10-09",
+                  "type": "text"
+                },
+                {
+                  "key": "fecha_vencimiento",
+                  "value": "2027-10-09",
+                  "type": "text"
+                },
+                {
+                  "key": "estado",
+                  "value": "Activo",
+                  "type": "text"
+                },
+                {
+                  "key": "estado_tramite",
+                  "value": "resuelto",
+                  "type": "text"
+                },
+                {
+                  "key": "tipo_destino_vuelco",
+                  "value": "cursos_agua",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "30 Registrar dictamen del análisis ficticio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/analisis/{{analisis_id}}/revision",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "resultado_final",
+                  "value": "Aprobado",
+                  "type": "text"
+                },
+                {
+                  "key": "observaciones_revision",
+                  "value": "PRUEBA FICTICIA para verificar el flujo de revisión.",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "31 Comprobar dictamen registrado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/analisis/{{analisis_id}}",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Dictamen aprobado', () => pm.expect(pm.response.text()).to.include('Aprobado'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "32 Rechazar sobrescritura de dictamen → 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/analisis/{{analisis_id}}/revision",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "resultado_final",
+                  "value": "Aprobado",
+                  "type": "text"
+                },
+                {
+                  "key": "observaciones_revision",
+                  "value": "PRUEBA FICTICIA para verificar el flujo de revisión.",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 422', () => pm.expect(pm.response.code).to.be.oneOf([422]));",
+                  "pm.test('Dictamen ya cerrado', () => pm.expect(pm.response.json().errors).to.have.property('resultado_final'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "33 Listar detecciones climáticas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/alertas-climaticas?estado=todas",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "34 Rechazar filtro desconocido → 422",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/alertas-climaticas?estado=inventado",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 422', () => pm.expect(pm.response.code).to.be.oneOf([422]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "35 Cerrar sesión de inspector",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/logout",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 · Opcional: detección existente",
+      "description": "Ejecutar MANUALMENTE con sesión de inspector y alerta_id de una detección real guardada. No requiere inventar una alerta ni modificar la base.",
+      "item": [
+        {
+          "name": "36 Marcar detección revisada",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/alertas-climaticas/{{alerta_id}}",
+            "description": "Obtener primero una sesión de inspector con las solicitudes 26–28. Completar alerta_id manualmente."
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "37 Ver detecciones revisadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/alertas-climaticas?estado=revisadas",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 · Opcional: registrar otro propietario",
+      "description": "Sin sesión. Completar nuevo_email y nueva_password. No usar datos reales ni repetir el mismo correo.",
+      "item": [
+        {
+          "name": "38 Obtener CSRF de registro",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/login",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "39 Crear cuenta de prueba",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "url": "{{base_url}}/registro",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "nombre",
+                  "value": "Melina",
+                  "type": "text"
+                },
+                {
+                  "key": "apellido",
+                  "value": "Prueba",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "{{nuevo_email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{nueva_password}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password_confirmation",
+                  "value": "{{nueva_password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 302', () => pm.expect(pm.response.code).to.be.oneOf([302]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 · Python independiente",
+      "item": [
+        {
+          "name": "40 Consultar pronóstico real",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{python_url}}/api/v1/alerta-climatica?latitud=-28.54&longitud=-57.17",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 200 o 503', () => pm.expect(pm.response.code).to.be.oneOf([200,503]));",
+                  "pm.test('Contrato climático', () => { const d = pm.response.json(); pm.expect(d.estado).to.equal(pm.response.code === 200 ? 'disponible' : 'no_disponible'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "41 Rechazar latitud fuera de rango → 422",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{python_url}}/api/v1/alerta-climatica?latitud=100&longitud=-57.17",
+            "description": ""
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado esperado: 422', () => pm.expect(pm.response.code).to.be.oneOf([422]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

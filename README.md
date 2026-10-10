@@ -1,58 +1,77 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Desafío Iberá — gestión de efluentes
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación Laravel con vistas Blade para propietarios e inspectores, carga privada de informes PDF, evaluación asistida, dictamen humano y consultas climáticas a un servicio Python/FastAPI.
 
-## About Laravel
+## Preparar una copia nueva
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Requisitos: PHP 8.4 con las extensiones exigidas por Composer, Composer, Node.js compatible con Vite 8, MySQL y Python 3.12. El entorno local verificado utiliza MySQL 8.4. Las versiones PHP están fijadas en `composer.lock`; Python aún usa `requirements.text` sin versiones fijadas.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```powershell
+composer install
+npm ci
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Solo si todavía no existe `.env`, copiar `.env.example` y ejecutar `php artisan key:generate`. Configurar las credenciales de una base propia ya creada. No sobrescribir un `.env` existente ni compartirlo en Git. Para esta configuración, usar una sola línea `DB_CONNECTION=mysql`.
 
-## Contributing
+```powershell
+php artisan config:clear
+php artisan migrate --no-interaction
+php artisan db:seed --class=LimiteEfluenteSeeder --no-interaction
+npm run build
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+No utilizar `migrate:fresh` en una base con datos que se quieran conservar. Los PDF requieren un directorio temporal de PHP escribible, `upload_max_filesize` de al menos 10M y `post_max_size` mayor que el archivo (por ejemplo 12M).
 
-## Code of Conduct
+Preparar Python en un entorno local aislado:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.text
+```
 
-## Security Vulnerabilities
+## Ejecutar localmente
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+En terminales separadas, desde la raíz:
 
-## License
+```powershell
+php artisan serve --host=127.0.0.1 --port=8000
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn api:app --app-dir motor_riesgo --host 127.0.0.1 --port 8001
+```
+
+```powershell
+php artisan schedule:work
+```
+
+Configurar `CLIMATE_API_URL=http://127.0.0.1:8001`. El programador consulta cada seis horas (00, 06, 12 y 18 UTC). Procesa en forma síncrona: este flujo no requiere un trabajador de colas adicional. Las terminales deben mantenerse abiertas. No se ha configurado un servicio permanente ni un despliegue público.
+
+Para consultar sin guardar: `php artisan clima:consultar -- -28.54 -57.17`. Para actualizar detecciones de todos los establecimientos: `php artisan clima:actualizar` (sí guarda resultados). `php artisan schedule:list` permite ver la programación.
+
+El registro público crea propietarios. Las cuentas de inspector/admin_gobierno deben provisionarse por el procedimiento de seguridad del equipo; no hay una contraseña administrativa compartida en este repositorio.
+
+## Rutas, permisos y pruebas
+
+Ver [RUTAS_Y_PRUEBAS.md](RUTAS_Y_PRUEBAS.md) para el contrato HTTP, campos, roles, caché, errores y la lista de aceptación. Importar [Desafio-Ibera.postman_collection.json](Desafio-Ibera.postman_collection.json) para las 41 solicitudes de prueba. Requiere cuentas locales y un PDF ficticio; contiene operaciones que guardan datos.
+
+```powershell
+php artisan test --compact
+.\.venv\Scripts\python.exe -m unittest discover -s motor_riesgo -p "test_*.py"
+npm run build
+```
+
+La suite habitual usa SQLite en memoria y respuestas HTTP controladas. Dos pruebas adicionales de MySQL/API real requieren configuración explícita; no se ejecutan por defecto. También existe una prueba optativa con Newman que ejecuta las 35 solicitudes del recorrido principal de Postman contra un servidor real y una base temporal aislada; ver las instrucciones en RUTAS_Y_PRUEBAS.md.
+
+## Alcance actual
+
+- Login/registro, sesiones y autorización por rol/propietario.
+- Alta, consulta y edición de establecimientos; permiso de vuelco por gobierno.
+- PDF privado, registro mediante los servicios de extracción y evaluación del equipo, historial y descarga autorizada.
+- Dictamen humano con autor, fecha y fundamento, sin sobrescritura desde el formulario.
+- Catálogo de límites en caché con vencimiento e invalidación por cambios.
+- Consulta climática, detecciones periódicas sin duplicar cada ciclo y revisión por gobierno.
+
+Las operaciones de negocio usan rutas web con sesión; no hay una API REST de negocio paralela bajo `/api`. La alerta climática es preventiva, no un dictamen legal ni un modelo entrenado de inteligencia artificial. El umbral climático debe validarse con especialistas.
+
+Antes de entregar: integrar las últimas pantallas y cambios de autenticación/OCR del equipo y completar la aceptación conjunta. Si se requiere hosting, también configurar los procesos persistentes y el programador. El PDF escaneado y los cambios de seguridad de Catalina deben comprobarse cuando se incorporen.
