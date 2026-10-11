@@ -31,6 +31,7 @@ test('profile information can be updated', function () {
 
     $this->assertSame('Test', $user->nombre);
     $this->assertSame('User', $user->apellido);
+    $this->assertSame('Test User', $user->name);
     $this->assertSame('test@example.com', $user->email);
     $this->assertNull($user->email_verified_at);
 });

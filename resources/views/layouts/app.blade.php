@@ -58,12 +58,12 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('analisis.create') }}" class="nav-link {{ request()->routeIs('analisis.create') ? 'active' : '' }}">
+                    <a href="{{ route('analisis.crear') }}" class="nav-link {{ request()->routeIs('analisis.create') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-arrow-up me-2"></i> Cargar análisis
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('analisis.index') }}" class="nav-link {{ request()->routeIs('analisis.index') ? 'active' : '' }}">
+                    <a href="{{ route('analisis.indice') }}" class="nav-link {{ request()->routeIs('analisis.indice') ? 'active' : '' }}">
                         <i class="bi bi-clock-history me-2"></i> Historial
                     </a>
                 </li>

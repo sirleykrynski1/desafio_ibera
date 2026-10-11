@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,6 +24,32 @@ class User extends Authenticatable
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Mantiene el nombre completo del esquema anterior, incluso al sembrar sin eventos.
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function nombre(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $valor, array $atributos): array => [
+                'nombre' => $valor,
+                'name' => trim(($valor ?? '').' '.($atributos['apellido'] ?? '')),
+            ],
+        );
+    }
+
+    /** @return Attribute<string|null, string|null> */
+    protected function apellido(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $valor, array $atributos): array => [
+                'apellido' => $valor,
+                'name' => trim(($atributos['nombre'] ?? '').' '.($valor ?? '')),
+            ],
+        );
+    }
 
     /**
      * Relación: un propietario puede tener uno o varios establecimientos.
