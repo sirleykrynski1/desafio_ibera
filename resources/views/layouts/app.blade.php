@@ -74,13 +74,23 @@
                 </li>
             </ul>
 
-            <!-- Perfil del Hotel (Pie de menú) -->
-            <div class="pt-3 border-top px-2 d-flex justify-content-between align-items-center text-muted">
-                <div>
-                    <strong class="d-block text-dark small">Hotel Paraíso</strong>
-                    <small style="font-size: 0.7rem;">Establecimiento</small>
+            <!-- Perfil del Hotel y Botón de Cerrar Sesión (Pie de menú) -->
+            <div class="pt-3 border-top px-2">
+                <div class="d-flex justify-content-between align-items-center text-muted mb-2">
+                    <div>
+                        <strong class="d-block text-dark small">Hotel Paraíso</strong>
+                        <small style="font-size: 0.7rem;">Establecimiento</small>
+                    </div>
+                    <i class="bi bi-building"></i>
                 </div>
-                <i class="bi bi-chevron-right small"></i>
+                
+                <!-- Botón de Logout -->
+               <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-1">
+                        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                    </button>
+                </form>
             </div>
         </aside>
 

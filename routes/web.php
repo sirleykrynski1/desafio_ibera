@@ -49,4 +49,10 @@ Route::middleware('auth')->group(function (): void {
 Route::get('/insignias', function () {
     return view('insignias');
 })->name('insignias.index');
-    });
+
+// Ruta de cierre de sesión (Logout)
+Route::post('/logout', function () {
+    // Aquí la Persona 2 del backend luego agregará la lógica de cierre de sesión,
+    // por ahora redirige al inicio o login.
+    return redirect()->route('dashboard');
+})->name('logout');
