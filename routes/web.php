@@ -20,7 +20,6 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/login', [SesionController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
     Route::post('/registro', [SesionController::class, 'register'])->middleware('throttle:6,1')->name('registro');
 });
-
 Route::middleware('auth')->group(function (): void {
     Route::get('/alertas-climaticas', [AlertaClimaticaController::class, 'index'])->name('alertas.indice');
     Route::patch('/alertas-climaticas/{alerta}', [AlertaClimaticaController::class, 'update'])->name('alertas.revisar');

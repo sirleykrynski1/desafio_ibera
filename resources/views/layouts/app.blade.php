@@ -3,101 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Gestión de Efluentes - ICAA')</title>
+    <title>Gestión de Efluentes - Eco-Iberá</title>
     
-    <!-- Carga de Bootstrap y JS vía Vite -->
+    <!-- Carga de Bootstrap vía Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <!-- Iconos Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <style>
-        .sidebar {
-            width: 250px;
-            min-height: 100vh;
-            background-color: #ffffff;
-            border-right: 1px solid #e5e7eb;
-        }
-        .nav-link.active {
-            background-color: #e6f4ea;
-            color: #137333 !important;
-            font-weight: 600;
-            border-radius: 8px;
-        }
-        .nav-link {
-            color: #4b5563;
-            border-radius: 8px;
-            margin-bottom: 4px;
-        }
-        .nav-link:hover {
-            background-color: #f3f4f6;
-            color: #111827;
-        }
-    </style>
 </head>
 <body class="bg-light">
 
-    <div class="d-flex">
-        <!-- Sidebar / Menú Lateral -->
-        <aside class="sidebar p-3 d-flex flex-column flex-shrink-0">
-            <!-- Brand / Logotipo -->
-            <div class="d-flex items-center gap-2 mb-4 px-2">
-                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                    <i class="bi bi-droplet-fill"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0 text-dark">Gestión de Efluentes</h6>
-                    <small class="text-muted" style="font-size: 0.75rem;">ICAA - Corrientes</small>
-                </div>
+    <!-- Barra de Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ route('inicio') }}">Gestión de Efluentes</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir o cerrar navegación">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    @auth
+                    @if(in_array(auth()->user()->rol, ['inspector', 'admin_gobierno'], true))
+                    <li class="nav-item"><a class="nav-link" href="{{ route('gestion') }}">Gestión</a></li>
+                    @endif
+                    <li class="nav-item"><a class="nav-link" href="{{ route('establecimientos.indice') }}">Establecimientos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('analisis.indice') }}">Historial</a></li>
+                    <li class="nav-item"><form action="{{ route('logout') }}" method="POST">@csrf<button class="btn btn-outline-light" type="submit">Salir</button></form></li>
+                    @can('create', App\Models\Establecimiento::class)
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('analisis.crear') }}">Cargar Análisis</a>
+                    </li>
+                    @endcan
+                    @else
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Ingresar</a></li>
+                    @endauth
+                </ul>
             </div>
+        </div>
+    </nav>
 
-            <!-- Navegación del Hotel -->
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item">
-                    <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-house-door me-2"></i> Inicio
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('analisis.crear') }}" class="nav-link {{ request()->routeIs('analisis.create') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-arrow-up me-2"></i> Cargar análisis
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('analisis.indice') }}" class="nav-link {{ request()->routeIs('analisis.indice') ? 'active' : '' }}">
-                        <i class="bi bi-clock-history me-2"></i> Historial
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('insignias.index') }}" class="nav-link {{ request()->routeIs('insignias.index') ? 'active' : '' }}">
-                        <i class="bi bi-award me-2"></i> Insignias
-                    </a>
-                </li>
-            </ul>
-
-            <!-- Perfil del Hotel y Botón de Cerrar Sesión (Pie de menú) -->
-            <div class="pt-3 border-top px-2">
-                <div class="d-flex justify-content-between align-items-center text-muted mb-2">
-                    <div>
-                        <strong class="d-block text-dark small">Hotel Paraíso</strong>
-                        <small style="font-size: 0.7rem;">Establecimiento</small>
-                    </div>
-                    <i class="bi bi-building"></i>
-                </div>
-                
-                <!-- Botón de Logout -->
-               <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-1">
-                        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-                    </button>
-                </form>
-            </div>
-        </aside>
-
-        <!-- Contenido principal dinámico -->
-        <main class="flex-grow-1 p-4 overflow-auto" style="height: 100vh;">
-            @yield('content')
-        </main>
+    <!-- Contenido dinámico -->
+    <div class="container">
+        @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+        @if($errors->any())
+        <div class="alert alert-danger" role="alert"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+        @endif
+        @if(session('advertencias'))
+        <div class="alert alert-warning"><ul class="mb-0">@foreach(session('advertencias') as $advertencia)<li>{{ $advertencia }}</li>@endforeach</ul></div>
+        @endif
+        @yield('content')
     </div>
 
 </body>
