@@ -50,5 +50,5 @@ Route::get('/insignias', function () {
     return view('insignias');
 })->name('insignias.index');
 
-
+require __DIR__.'/auth.php';
 });
