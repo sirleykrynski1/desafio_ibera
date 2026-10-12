@@ -25,10 +25,12 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'nombre' => fake()->firstName(),
+            'apellido' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'rol' => 'propietario',
             'remember_token' => Str::random(10),
         ];
     }
@@ -40,6 +42,36 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Usuario del gobierno municipal / autoridad ambiental.
+     */
+    public function gobierno(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => 'admin_gobierno',
+        ]);
+    }
+
+    /**
+     * Inspector ambiental de la cuenca.
+     */
+    public function inspector(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => 'inspector',
+        ]);
+    }
+
+    /**
+     * Dueño de un establecimiento comercial.
+     */
+    public function propietario(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => 'propietario',
         ]);
     }
 }

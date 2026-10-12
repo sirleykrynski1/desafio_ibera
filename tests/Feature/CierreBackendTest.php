@@ -72,11 +72,15 @@ test('no permite revisar mientras la lectura sigue pendiente', function () {
     expect($informe->fresh()->estado)->toBe('pendiente_lectura');
 });
 
-test('login y dashboard dirigen según el rol', function (string $rol, string $destino) {
+test('login dirige según el rol', function (string $rol, string $destino) {
     $user = User::factory()->create(['rol' => $rol]);
     $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertRedirect(route($destino));
-    $this->get(route('dashboard'))->assertRedirect(route($destino));
-})->with([['inspector', 'gestion'], ['admin_gobierno', 'gestion'], ['propietario', 'establecimientos.indice']]);
+})->with([['inspector', 'gestion'], ['admin_gobierno', 'gestion'], ['propietario', 'dashboard']]);
+
+test('dashboard muestra el panel del establecimiento', function () {
+    $this->actingAs(User::factory()->create(['rol' => 'propietario']))
+        ->get(route('dashboard'))->assertOk()->assertSee('Resumen del Establecimiento');
+});
 
 test('visitantes no acceden a revisión ni pronóstico', function () {
     $informe = informeParaRevision();

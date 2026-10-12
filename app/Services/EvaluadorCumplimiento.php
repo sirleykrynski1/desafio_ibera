@@ -131,10 +131,10 @@ class EvaluadorCumplimiento
     {
         $limites = [];
 
-        foreach (LimiteEfluente::all() as $limite) {
-            $limites[$limite->parametro] = $this->parsearLimite(
-                $limite->{$columna},
-                $limite->unidad
+        foreach (LimiteEfluente::catalogoParaEvaluacion() as $limite) {
+            $limites[$limite['parametro']] = $this->parsearLimite(
+                $limite[$columna],
+                $limite['unidad']
             );
         }
 

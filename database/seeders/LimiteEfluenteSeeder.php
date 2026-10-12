@@ -111,5 +111,7 @@ class LimiteEfluenteSeeder extends Seeder
                 $limite
             );
         }
+
+        LimiteEfluente::olvidarCatalogo();
     }
 }

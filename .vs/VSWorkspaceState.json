@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\resources",
+    "\\resources\\views",
+    "\\resources\\views\\layouts",
+    "\\storage\\app\\private",
+    "\\storage\\app\\public",
+    "\\tests\\Feature",
+    "\\tests\\Unit"
+  ],
+  "SelectedNode": "\\resources\\views\\dashboard.blade.php",
+  "PreviewInSolutionExplorer": false
+}
