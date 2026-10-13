@@ -43,8 +43,6 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/analisis/{analisis}', [AnalisisController::class, 'show'])->name('analisis.mostrar');
     Route::get('/analisis/{analisis}/pdf', [AnalisisController::class, 'download'])->name('analisis.pdf');
 
-    
-
     // Panel de insignias de cumplimiento
     Route::get('/insignias', function () {
         return view('insignias');
@@ -56,7 +54,7 @@ Route::middleware('auth')->group(function (): void {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rutas para administración / inspectores / gobierno
-    Route::prefix('admin')->group(function (): void {
+    Route::middleware('role:admin_gobierno')->prefix('admin')->group(function (): void {
         Route::get('/dashboard', [InspectorController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/detalle-establecimientos', [InspectorController::class, 'index'])->name('admin.detalle-establecimientos');
         Route::get('/alertas', [InspectorController::class, 'alertas'])->name('admin.alertas');
@@ -71,14 +69,13 @@ Route::middleware('auth')->group(function (): void {
     });
 
     // Rutas de compatibilidad con /icaa/...
-    Route::prefix('icaa')->group(function (): void {
+    Route::middleware('role:inspector,admin_gobierno')->prefix('icaa')->group(function (): void {
         Route::get('/dashboard', [InspectorController::class, 'dashboard']);
         Route::get('/inspectores', [InspectorController::class, 'index']);
         Route::get('/alertas', [InspectorController::class, 'alertas']);
         Route::get('/exportar', [InspectorController::class, 'exportarCsv']);
     });
 
-   
 });
 
 require __DIR__.'/auth.php';
