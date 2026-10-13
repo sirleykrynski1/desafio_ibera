@@ -1,0 +1,137 @@
+/* ========================================================
+   SISTEMA DE NAVEGACIÓN LATERAL RESPONSIVA (ECO-IBERÁ)
+   ======================================================== */
+
+:root {
+    --sidebar-width: 280px;
+    --sidebar-bg: #ffffff;
+    --sidebar-border: #e5e7eb;
+    --sidebar-header-height: 56px;
+    --sidebar-accent: #198754;
+    --sidebar-hover-bg: #f8fafc;
+    --sidebar-active-bg: #198754;
+    --sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- Telón de fondo (overlay móvil) ---------- */
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 1045;
+}
+
+/* ---------- Barra lateral (Sidebar) ---------- */
+.left-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    max-width: 85vw;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+    z-index: 1050;
+    overflow-y: auto;
+    transition: transform var(--sidebar-transition), box-shadow var(--sidebar-transition);
+}
+
+/* ---------- Ícono de la marca ---------- */
+.brand-icon-wrapper {
+    width: 36px;
+    height: 36px;
+}
+
+/* ---------- Items de Navegación ---------- */
+.sidebar-nav-item {
+    transition: all 0.15s ease-in-out;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-nav-item.hover-bg:hover {
+    background-color: var(--sidebar-hover-bg);
+    color: #111827 !important;
+}
+
+.sidebar-nav-item.active {
+    box-shadow: 0 2px 6px rgba(25, 135, 84, 0.25);
+    border-left-color: #0f5132;
+}
+
+.sidebar-nav-item .nav-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.sidebar-nav-item.active .nav-icon {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ---------- Cabecera móvil ---------- */
+.sidebar-mobile-header {
+    height: var(--sidebar-header-height);
+    z-index: 1030;
+}
+
+/* ---------- Adaptación del contenido principal ---------- */
+/* En escritorio (>= 768px): el menú lateral está fijo a la izquierda */
+@media (min-width: 768px) {
+    .left-sidebar {
+        transform: translateX(0) !important;
+        box-shadow: none !important;
+    }
+
+    .sidebar-mobile-header {
+        display: none !important;
+    }
+
+    .sidebar-backdrop {
+        display: none !important;
+    }
+
+    /* Empuja el contenido principal a la derecha */
+    .has-sidebar-layout,
+    body.with-sidebar main,
+    body.with-sidebar .main-content-wrapper {
+        margin-left: var(--sidebar-width);
+        min-height: 100vh;
+    }
+}
+
+/* En móviles y tablets (< 768px): el menú se oculta y se abre con drawer */
+@media (max-width: 767.98px) {
+    .left-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .left-sidebar.show {
+        transform: translateX(0);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Espacio superior para que el contenido no quede tapado por la barra móvil */
+    .has-sidebar-layout,
+    body.with-sidebar main,
+    body.with-sidebar .main-content-wrapper {
+        margin-left: 0;
+        padding-top: calc(var(--sidebar-header-height) + 12px);
+    }
+}
+
+/* Barra de scroll discreta */
+.left-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+.left-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.left-sidebar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+}

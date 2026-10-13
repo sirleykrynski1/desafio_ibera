@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\InspectorController;
 use App\Http\Controllers\AlertaClimaticaController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Controllers\ClimaEstablecimientoController;
@@ -10,8 +11,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RevisionAnalisisController;
 use App\Http\Controllers\SesionController;
 use Illuminate\Support\Facades\Route;
-
-
 
 Route::view('/', 'welcome')->name('inicio');
 
@@ -45,9 +44,37 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/analisis/{analisis}/pdf', [AnalisisController::class, 'download'])->name('analisis.pdf');
 
     // Panel de insignias de cumplimiento
-Route::get('/insignias', function () {
-    return view('insignias');
-})->name('insignias.index');
+    Route::get('/insignias', function () {
+        return view('insignias');
+    })->name('insignias.index');
 
-require __DIR__.'/auth.php';
+    // Perfil
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Rutas para administración / inspectores / gobierno
+    Route::prefix('admin')->group(function (): void {
+        Route::get('/dashboard', [InspectorController::class, 'dashboard'])->name('admin.dashboard');
+        Route::get('/detalle-establecimientos', [InspectorController::class, 'index'])->name('admin.detalle-establecimientos');
+        Route::get('/alertas', [InspectorController::class, 'alertas'])->name('admin.alertas');
+        Route::get('/inspectores', [InspectorController::class, 'index'])->name('admin.inspectores');
+
+        // Acciones del panel de inspectores
+        Route::get('/exportar', [InspectorController::class, 'exportarCsv'])->name('icaa.exportar');
+        Route::get('/establecimientos/{id}', [InspectorController::class, 'show'])->name('icaa.establecimientos.ver');
+        Route::post('/establecimientos', [InspectorController::class, 'store'])->name('icaa.establecimientos.guardar');
+        Route::post('/establecimientos/{id}', [InspectorController::class, 'updateEstablecimiento'])->name('icaa.establecimientos.actualizar');
+        Route::post('/establecimientos/{id}/eliminar', [InspectorController::class, 'destroyEstablecimiento'])->name('icaa.establecimientos.eliminar');
+    });
+
+    // Rutas de compatibilidad con /icaa/...
+    Route::prefix('icaa')->group(function (): void {
+        Route::get('/dashboard', [InspectorController::class, 'dashboard']);
+        Route::get('/inspectores', [InspectorController::class, 'index']);
+        Route::get('/alertas', [InspectorController::class, 'alertas']);
+        Route::get('/exportar', [InspectorController::class, 'exportarCsv']);
+    });
+
+    require __DIR__.'/auth.php';
 });
