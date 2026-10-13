@@ -5,7 +5,11 @@
     <!-- Columna Izquierda: Semáforo e Insignias -->
     <div class="col-lg-8">
         <h2 class="mb-4">Resumen del Establecimiento</h2>
-        
+        <div class="mb-4">
+    <h2 class="fw-bold text-dark mb-1">¡Hola, Hotel Paraíso!</h2>
+    <p class="text-muted small">Acá podés ver el estado de tus análisis y el cumplimiento de la normativa ambiental.</p>
+    <h4 class="mt-3 fw-bold">Resumen del Establecimiento</h4>
+</div>
         <!-- Tarjeta del Semáforo -->
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body text-center p-5">
