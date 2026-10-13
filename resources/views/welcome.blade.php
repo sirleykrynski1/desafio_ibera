@@ -865,7 +865,6 @@
     </section>
   </main>
 
-     
   <footer class="footer container">
     <a class="brand" href="#inicio" aria-label="Ypora, volver al inicio">
       <span class="brand-mark">
@@ -876,4 +875,4 @@
     <p>Monitoreo ambiental y gestión de efluentes · Corrientes, Argentina</p>
   </footer>
 </body>
-</html> No newline 
+</html>

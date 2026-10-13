@@ -43,6 +43,10 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/analisis/{analisis}', [AnalisisController::class, 'show'])->name('analisis.mostrar');
     Route::get('/analisis/{analisis}/pdf', [AnalisisController::class, 'download'])->name('analisis.pdf');
 
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
     // Panel de insignias de cumplimiento
     Route::get('/insignias', function () {
         return view('insignias');
@@ -78,3 +82,5 @@ Route::middleware('auth')->group(function (): void {
 
     require __DIR__.'/auth.php';
 });
+
+require __DIR__.'/auth.php';

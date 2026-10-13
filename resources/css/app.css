@@ -14,3 +14,36 @@
 .navbar-collapse {
     visibility: visible;
 }
+
+.ypora-login {
+    --bs-success-rgb: 22, 79, 62;
+    --bs-light-rgb: 247, 249, 245;
+    color: #173c32;
+    min-height: 100vh;
+    background-image:
+        radial-gradient(ellipse at 5% 35%, #e4f0e7 0, transparent 48%),
+        radial-gradient(ellipse at 95% 15%, #edf4e4 0, transparent 42%);
+    background-repeat: no-repeat;
+}
+
+.ypora-login .btn-success {
+    --bs-btn-bg: #164f3e;
+    --bs-btn-border-color: #164f3e;
+    --bs-btn-hover-bg: #102f29;
+    --bs-btn-hover-border-color: #102f29;
+    --bs-btn-active-bg: #102f29;
+    --bs-btn-active-border-color: #102f29;
+    --bs-btn-disabled-bg: #164f3e;
+    --bs-btn-disabled-border-color: #164f3e;
+    --bs-btn-focus-shadow-rgb: 40, 116, 87;
+}
+
+.ypora-login .card,
+.ypora-login .form-control {
+    border-color: rgba(34, 89, 65, .12);
+}
+
+.ypora-login .form-control:focus {
+    border-color: #287457;
+    box-shadow: 0 0 0 .25rem rgba(40, 116, 87, .2);
+}
