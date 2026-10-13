@@ -19,7 +19,7 @@
 </tbody></table></div>
 @if($analisis->revisado_en)
 <h2 class="h4">Revisión humana</h2>
-<p>Revisado por {{ $analisis->revisor?->name ?? 'Usuario no disponible' }} el {{ $analisis->revisado_en->format('d/m/Y H:i') }} ({{ config('app.timezone') }}).</p>
+<p>Revisado por {{ trim(($analisis->revisor?->nombre ?? '').' '.($analisis->revisor?->apellido ?? '')) ?: ($analisis->revisor?->name ?? 'Usuario no disponible') }} el {{ $analisis->revisado_en->format('d/m/Y H:i') }} ({{ config('app.timezone') }}).</p>
 <p>{{ $analisis->observaciones_revision }}</p>
 @endif
 @can('revisarAnalisis', $analisis->establecimiento)

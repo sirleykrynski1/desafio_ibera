@@ -5,6 +5,8 @@ use App\Http\Controllers\AlertaClimaticaController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Controllers\ClimaEstablecimientoController;
 use App\Http\Controllers\EstablecimientoController;
+use App\Http\Controllers\InsigniaController;
+use App\Http\Controllers\PanelEstablecimientoController;
 use App\Http\Controllers\PanelGestionController;
 use App\Http\Controllers\PermisoVuelcoController;
 use App\Http\Controllers\ProfileController;
@@ -24,7 +26,7 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('/alertas-climaticas/{alerta}', [AlertaClimaticaController::class, 'update'])->name('alertas.revisar');
     Route::post('/logout', [SesionController::class, 'destroy'])->name('logout');
 
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/dashboard', [PanelEstablecimientoController::class, 'index'])->name('dashboard');
     Route::get('/gestion', [PanelGestionController::class, 'index'])->name('gestion');
 
     Route::get('/establecimientos/{establecimiento}/clima', [ClimaEstablecimientoController::class, 'show'])->middleware('throttle:20,1')->name('establecimientos.clima');
@@ -44,9 +46,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/analisis/{analisis}/pdf', [AnalisisController::class, 'download'])->name('analisis.pdf');
 
     // Panel de insignias de cumplimiento
-    Route::get('/insignias', function () {
-        return view('insignias');
-    })->name('insignias.index');
+    Route::get('/insignias', [InsigniaController::class, 'index'])->name('insignias.index');
 
     // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

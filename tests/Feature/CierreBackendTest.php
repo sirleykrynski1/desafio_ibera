@@ -25,7 +25,7 @@ function informeParaRevision(string $estado = 'evaluado'): AnalisisLaboratorio
 test('gobierno registra dictamen auditable sin modificar evaluación automática ni permitir sobrescritura', function (string $rol, string $decision, string $estado) {
     $this->freezeTime();
     $informe = informeParaRevision($estado);
-    $inspector = User::factory()->create(['rol' => $rol]);
+    $inspector = User::factory()->create(['rol' => $rol, 'nombre' => 'Ana', 'apellido' => 'Revisora', 'name' => 'Nombre anterior']);
     $this->actingAs($inspector)->post(route('analisis.revision', $informe), [
         'resultado_final' => $decision, 'observaciones_revision' => '<script>Fundamento revisado</script>',
         'revisado_por' => $informe->establecimiento->user_id, 'resultado_sugerido' => 'cumple',
@@ -36,7 +36,10 @@ test('gobierno registra dictamen auditable sin modificar evaluación automática
     expect($informe->estado)->toBe('revisado');
     expect($informe->revisado_por)->toBe($inspector->id);
     expect($informe->revisado_en->toDateTimeString())->toBe(now()->toDateTimeString());
-    $this->get(route('analisis.mostrar', $informe))->assertOk()->assertSee('&lt;script&gt;Fundamento revisado&lt;/script&gt;', false);
+    $this->get(route('analisis.mostrar', $informe))->assertOk()
+        ->assertSee('Revisado por Ana Revisora')
+        ->assertDontSee('Nombre anterior')
+        ->assertSee('&lt;script&gt;Fundamento revisado&lt;/script&gt;', false);
     $this->get(route('gestion'))->assertDontSee($informe->establecimiento->nombre);
     $this->post(route('analisis.revision', $informe), ['resultado_final' => 'Rechazado', 'observaciones_revision' => 'Segundo envío'])
         ->assertSessionHasErrors('resultado_final');
