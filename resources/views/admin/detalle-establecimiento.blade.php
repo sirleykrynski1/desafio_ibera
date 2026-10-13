@@ -1,42 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle: {{ $establecimiento->nombre }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        :root { --primary-color: #1b5e20; --secondary-color: #2e7d32; --dark-sidebar: #0a2512; }
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { background-color: var(--dark-sidebar); min-height: 100vh; color: #fff; }
-        .sidebar .nav-link { color: #b2dfdb; border-radius: 8px; margin: 4px 15px; padding: 10px 15px; }
-        .sidebar .nav-link.active { background-color: var(--secondary-color); color: #fff; }
-        .card-custom { border: none; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); background: #fff; }
-    </style>
-</head>
-<body>
+@extends('layouts.app')
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- BARRA LATERAL (Sidebar mínima) -->
-        <div class="col-md-3 col-lg-2 px-0 sidebar d-flex flex-column pb-4">
-            <div class="px-4 py-4 d-flex align-items-center">
-                <i class="bi bi-droplet-fill text-success fs-3 me-2"></i>
-                <div>
-                    <h6 class="mb-0 fw-bold">ICAA</h6>
-                    <small class="text-muted text-uppercase" style="font-size: 10px;">Desafío Iberá</small>
-                </div>
-            </div>
-            <ul class="nav flex-column mt-3">
-                <li class="nav-item">
-                    <a href="{{ url('/icaa/inspectores') }}" class="nav-link"><i class="bi bi-arrow-left me-2"></i> Volver al panel</a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- CONTENIDO PRINCIPAL -->
-        <div class="col-md-9 col-lg-10 p-4">
+@section('content')
+<div class="py-2">
             
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -124,10 +89,5 @@
                 </div>
             </div>
 
-        </div>
     </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+@endsection

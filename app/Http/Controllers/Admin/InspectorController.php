@@ -15,7 +15,7 @@ class InspectorController extends Controller
 
         // Filtro 1: Por Zona / Ubicación
         if ($request->filled('zona')) {
-            $query->where('ubicacion', 'like', '%' . $request->zona . '%');
+            $query->where('ubicacion', 'like', '%'.$request->zona.'%');
         }
 
         // Filtro 2: Por Destino de Vuelco
@@ -23,8 +23,8 @@ class InspectorController extends Controller
             $query->where('tipo_destino_vuelco', $request->destino);
         }
 
-        /* 
-         * TODO PARA INTEGRACIÓN (Persona 1 / 5): 
+        /*
+         * TODO PARA INTEGRACIÓN (Persona 1 / 5):
          * Descomentar este bloque cuando la tabla 'analisis_laboratorio' esté lista.
          *
          * if ($request->filled('estado')) {
@@ -54,11 +54,11 @@ class InspectorController extends Controller
         $establecimiento = DB::table('establecimientos')->where('id', $id)->first();
 
         // Si por algún motivo escriben un ID que no existe en la URL, lo devolvemos
-        if (!$establecimiento) {
+        if (! $establecimiento) {
             return redirect('/icaa/inspectores')->with('error', 'Establecimiento no encontrado.');
         }
 
-        /* 
+        /*
          * TODO PARA INTEGRACIÓN:
          * Cuando la Persona 1 termine, acá buscaremos el historial real:
          * $analisis = DB::table('analisis_laboratorio')->where('establecimiento_id', $id)->orderBy('fecha', 'desc')->get();
@@ -72,19 +72,19 @@ class InspectorController extends Controller
     public function store(Request $request)
     {
         DB::table('establecimientos')->insert([
-            'user_id' => auth()->id() ?? 1, 
+            'user_id' => auth()->id() ?? 1,
             'nombre' => $request->nombre,
             'cuit' => $request->cuit,
             'ubicacion' => $request->ubicacion,
             'rubro' => $request->rubro,
-            
+
             // Le mandamos un 0 de forma "invisible" para cumplir con la base de datos
             'latitud' => 0,
             'longitud' => 0,
-            
+
             'capacidad_maxima' => $request->capacidad_maxima ?: 0,
             'capacidad_biodigestor' => $request->capacidad_biodigestor ?: 0,
-            'tipo_destino_vuelco' => $request->tipo_destino_vuelco
+            'tipo_destino_vuelco' => $request->tipo_destino_vuelco,
         ]);
 
         return redirect('/icaa/inspectores')->with('success', '¡Establecimiento creado correctamente!');
@@ -94,6 +94,7 @@ class InspectorController extends Controller
     public function createAnalisis()
     {
         $establecimientos = DB::table('establecimientos')->get();
+
         return view('admin.cargar-analisis', compact('establecimientos'));
     }
 
@@ -113,18 +114,18 @@ class InspectorController extends Controller
                 'revisado_en' => now(), // Agregamos este por las dudas
                 'observaciones_revision' => $request->observaciones_revision ?? '-',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
 
             return redirect('/icaa/inspectores')->with('success', '¡Análisis guardado con éxito!');
-            
+
         } catch (\Exception $e) {
-            // Si la base de datos rechaza el guardado, esto va a detener la pantalla 
+            // Si la base de datos rechaza el guardado, esto va a detener la pantalla
             // y te va a mostrar exactamente qué columna está causando el problema.
-            dd("ERROR AL GUARDAR:", $e->getMessage());
+            dd('ERROR AL GUARDAR:', $e->getMessage());
         }
     }
-    
+
     // Función para actualizar los datos
     public function updateEstablecimiento(Request $request, $id)
     {
@@ -136,7 +137,7 @@ class InspectorController extends Controller
             // Eliminamos latitud y longitud de este bloque para no borrar las coordenadas previas
             'capacidad_maxima' => $request->capacidad_maxima ?: 0,
             'capacidad_biodigestor' => $request->capacidad_biodigestor ?: 0,
-            'tipo_destino_vuelco' => $request->tipo_destino_vuelco
+            'tipo_destino_vuelco' => $request->tipo_destino_vuelco,
         ]);
 
         return redirect('/icaa/inspectores')->with('success', '¡Establecimiento actualizado correctamente!');
@@ -146,7 +147,7 @@ class InspectorController extends Controller
     public function destroyEstablecimiento($id)
     {
         DB::table('establecimientos')->where('id', $id)->delete();
-        
+
         return redirect('/icaa/inspectores')->with('success', '¡Establecimiento eliminado del sistema!');
     }
 
@@ -156,9 +157,9 @@ class InspectorController extends Controller
         // Contamos el total real de tu base de datos
         $total_establecimientos = DB::table('establecimientos')->count();
 
-        /* 
+        /*
          * TODO PARA INTEGRACIÓN (Persona 1 / 2):
-         * Cuando conecten los laboratorios, cambiar estos números fijos 
+         * Cuando conecten los laboratorios, cambiar estos números fijos
          * por consultas reales (ej: count() donde resultado = 'cumple').
          */
         $en_norma = 12;   // Valor simulado para tu maquetación
@@ -171,31 +172,31 @@ class InspectorController extends Controller
     // Función para el panel de Alertas Climáticas y de Riesgo
     public function alertas()
     {
-        /* 
+        /*
          * TODO PARA INTEGRACIÓN (Persona 1 / 2):
          * Acá se leerá la tabla de 'alertas_climaticas' generada por el Job de Python.
          */
-        
+
         // Datos simulados para maquetar la vista
         $alertas = [
-            (object)[
+            (object) [
                 'id' => 1,
                 'establecimiento' => 'Ecoposada del Estero',
                 'mensaje' => 'Alerta climática (lluvia intensa)',
                 'ultimo_analisis' => '45 días',
                 'prioridad' => 'Alta',
                 'color' => 'danger',
-                'icono' => 'bi-cloud-rain-heavy-fill'
+                'icono' => 'bi-cloud-rain-heavy-fill',
             ],
-            (object)[
+            (object) [
                 'id' => 2,
                 'establecimiento' => 'Hostería Rincón',
                 'mensaje' => 'Posible saturación de pozo absorbente',
                 'ultimo_analisis' => '12 días',
                 'prioridad' => 'Media',
                 'color' => 'warning',
-                'icono' => 'bi-droplet-half'
-            ]
+                'icono' => 'bi-droplet-half',
+            ],
         ];
 
         return view('admin.alertas', compact('alertas'));
@@ -208,17 +209,17 @@ class InspectorController extends Controller
 
         // Configuramos las cabeceras para que el navegador sepa que es una descarga de archivo
         $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=reporte_icaa_establecimientos.csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=reporte_icaa_establecimientos.csv',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         // Función que escribe los datos línea por línea
-        $callback = function() use($establecimientos) {
+        $callback = function () use ($establecimientos) {
             $file = fopen('php://output', 'w');
-            
+
             // 1. Escribimos los títulos de las columnas
             fputcsv($file, ['ID', 'Nombre', 'CUIT', 'Ubicación', 'Rubro', 'Destino Vuelco', 'Estado (Simulado)']);
 
@@ -231,7 +232,7 @@ class InspectorController extends Controller
                     $est->ubicacion,
                     $est->rubro,
                     $est->tipo_destino_vuelco,
-                    'En revisión' // TODO Integración: acá irá el estado real cuando esté listo
+                    'En revisión', // TODO Integración: acá irá el estado real cuando esté listo
                 ]);
             }
             fclose($file);
