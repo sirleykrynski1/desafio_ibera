@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('body-class', 'ypora-login')
 @section('content')
 <h1 class="h3">{{ request('portal') === 'gestion' ? 'Ingresar a gestión' : 'Ingresar' }}</h1>
 <p>El panel disponible depende del rol de tu cuenta. Las cuentas de gestión son asignadas por el equipo administrador.</p>

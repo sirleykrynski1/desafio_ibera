@@ -8,7 +8,7 @@
     <!-- Carga de Bootstrap vía Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-light">
+<body class="bg-light @yield('body-class')">
 
     <!-- Barra de Navegación -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
