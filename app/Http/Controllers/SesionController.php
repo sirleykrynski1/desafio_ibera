@@ -35,7 +35,7 @@ class SesionController extends Controller
             'password' => ['required', 'string', 'min:12', 'confirmed'],
         ]);
         $usuario = User::create([
-            'name' => $datos['nombre'].' '.$datos['apellido'],
+            
             'nombre' => $datos['nombre'], 'apellido' => $datos['apellido'],
             'email' => $datos['email'], 'password' => $datos['password'],
         ]);

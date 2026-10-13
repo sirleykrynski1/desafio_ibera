@@ -35,7 +35,6 @@ class User extends Authenticatable
         return Attribute::make(
             set: fn (?string $valor, array $atributos): array => [
                 'nombre' => $valor,
-                'name' => trim(($valor ?? '').' '.($atributos['apellido'] ?? '')),
             ],
         );
     }
@@ -46,7 +45,6 @@ class User extends Authenticatable
         return Attribute::make(
             set: fn (?string $valor, array $atributos): array => [
                 'apellido' => $valor,
-                'name' => trim(($atributos['nombre'] ?? '').' '.($valor ?? '')),
             ],
         );
     }
