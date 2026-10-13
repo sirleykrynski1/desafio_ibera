@@ -134,22 +134,13 @@
                                             <div class="d-flex gap-2">
                                                 <!-- BOTÓN VER DETALLE -->
                                                 <a href="{{ route('icaa.establecimientos.ver', $est->id) }}" class="btn btn-sm btn-outline-info rounded-pill">
-                                                    <i class="bi bi-eye"></i>
+                                                    <i class="bi bi-eye text-primary"></i>
                                                 </a>
 
                                                 <!-- BOTÓN EDITAR -->
                                                  <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $est->id }}">
-                                                    <i class="bi bi-pencil-square"></i>
+                                                    <i class="bi bi-pencil-square text-primary"></i>
                                                 </button>
-
-                                                <!-- BOTÓN ELIMINAR -->
-                                                <form action="{{ route('icaa.establecimientos.eliminar', $est->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
                                             </div>
 
                                             <!-- VENTANA FLOTANTE (MODAL) PARA EDITAR -->
