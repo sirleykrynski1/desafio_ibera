@@ -35,16 +35,31 @@
         </section>
         <section class="card shadow-sm border-0 mb-4">
             <div class="card-body p-4">
-                <h3 class="h5">Permiso de vuelco</h3>
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <h3 class="h5 mb-0">Permiso de vuelco</h3>
+                    <span class="badge rounded-pill {{ $estadoPermiso === 'Activo' ? 'bg-success' : ($permiso ? 'bg-warning text-dark' : 'bg-secondary') }}">
+                        {{ $estadoPermiso ?? 'Sin registrar' }}
+                    </span>
+                </div>
                 @if($permiso)
-                <p>Expediente: {{ $permiso->numero_expediente }}</p>
-                <p>Vencimiento: <strong>{{ $permiso->fecha_vencimiento->format('d/m/Y') }}</strong></p>
-                <p>Estado: <strong>{{ $estadoPermiso }}</strong></p>
-                <p>Trámite: {{ str_replace('_', ' ', $permiso->estado_tramite) }}</p>
+                <dl class="row mb-3">
+                    <dt class="col-sm-5 text-muted fw-normal">Expediente</dt>
+                    <dd class="col-sm-7 text-break">{{ $permiso->numero_expediente }}</dd>
+                    <dt class="col-sm-5 text-muted fw-normal">Fecha de emisión</dt>
+                    <dd class="col-sm-7">{{ $permiso->fecha_emision->format('d/m/Y') }}</dd>
+                    <dt class="col-sm-5 text-muted fw-normal">Vencimiento</dt>
+                    <dd class="col-sm-7 fw-semibold">{{ $permiso->fecha_vencimiento->format('d/m/Y') }}</dd>
+                    <dt class="col-sm-5 text-muted fw-normal">Estado del trámite</dt>
+                    <dd class="col-sm-7">{{ ucfirst(str_replace('_', ' ', $permiso->estado_tramite)) }}</dd>
+                </dl>
                 @else
-                <p class="text-muted">Sin permiso registrado.</p>
+                <div class="bg-light border rounded-3 p-3 mb-3">
+                    <p class="fw-semibold mb-2">Sin permiso registrado.</p>
+                    <p class="text-muted mb-0">Todavía no hay un expediente ni una fecha de vencimiento cargados para este establecimiento. El equipo de gestión debe registrar esa información.</p>
+                </div>
                 @endif
-                <a href="{{ route('establecimientos.mostrar', $establecimiento) }}">Ver establecimiento</a>
+                <p class="small text-muted">La carga de un análisis no otorga ni renueva el permiso automáticamente.</p>
+                <a href="{{ route('establecimientos.mostrar', $establecimiento) }}" class="btn btn-outline-success">Ver datos del establecimiento</a>
             </div>
         </section>
         <section class="card shadow-sm border-0">
