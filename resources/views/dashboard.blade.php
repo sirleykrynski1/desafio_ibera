@@ -1,94 +1,92 @@
 @extends('layouts.app')
-
 @section('content')
-<div class="row mt-4">
-    <!-- Columna Izquierda: Semáforo e Insignias -->
+<h1 class="h3 mb-3">Resumen del Establecimiento</h1>
+@if($establecimiento)
+<form method="GET" action="{{ route('dashboard') }}" class="mb-4">
+    <label for="establecimiento" class="form-label">Establecimiento</label>
+    <div class="d-flex gap-2">
+        <select id="establecimiento" name="establecimiento" class="form-select">
+            @foreach($establecimientos as $opcion)
+            <option value="{{ $opcion->id }}" @selected($opcion->id === $establecimiento->id)>{{ $opcion->nombre }}</option>
+            @endforeach
+        </select>
+        <button class="btn btn-success">Ver resumen</button>
+    </div>
+</form>
+<h2 class="h4 mb-4">{{ $establecimiento->nombre }}</h2>
+<div class="row g-4">
     <div class="col-lg-8">
-        <h2 class="mb-4">Resumen del Establecimiento</h2>
-        <div class="mb-4">
-    <h2 class="fw-bold text-dark mb-1">¡Hola, Hotel Paraíso!</h2>
-    <p class="text-muted small">Acá podés ver el estado de tus análisis y el cumplimiento de la normativa ambiental.</p>
-    <h4 class="mt-3 fw-bold">Resumen del Establecimiento</h4>
-</div>
-        <!-- Tarjeta del Semáforo -->
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body text-center p-5">
-                <h4 class="text-muted mb-4">Estado Actual de Cumplimiento</h4>
-                
-                <div class="alert alert-success py-4 rounded-4">
-                    <h1 class="display-4 fw-bold mb-0">VERDE</h1>
-                    <p class="lead mt-2 mb-0">El establecimiento cumple con la normativa.</p>
-                </div>
-                
-                <div class="mt-4 pt-3 border-top">
-                    <p class="mb-1">Próximo vencimiento del permiso de vuelco:</p>
-                    <h5 class="fw-bold">15 de Noviembre, 2026</h5>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tarjeta de Insignias (Gamificación) -->
-        <div class="card shadow-sm border-0">
+        <section class="card shadow-sm border-0 mb-4">
             <div class="card-body p-4">
-                <h5 class="card-title fw-bold border-bottom pb-2">Insignias de Cumplimiento</h5>
-                
-                <!-- Caso 1: Tiene la insignia (Mostramos esto de ejemplo) -->
-                <div class="d-flex align-items-center mt-3 p-3 bg-light rounded">
-                    <div class="bg-warning text-dark rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm" style="width: 60px; height: 60px;">
-                        <span class="fs-2">⭐</span>
-                    </div>
-                    <div>
-                        <h6 class="mb-1 fw-bold text-success">Sello "Recomendado" Eco-Iberá</h6>
-                        <p class="text-muted mb-0 small">¡Felicitaciones! Tienes 6 o más meses de cumplimiento continuo.</p>
-                    </div>
+                <h3 class="h5">Último análisis de laboratorio</h3>
+                <div class="alert alert-{{ $colorEvaluacion }} mt-3">
+                    <strong>{{ $evaluacion }}</strong>
+                    @if($analisis)<p class="mb-0 mt-2">Resultado automático. El dictamen humano se muestra por separado.</p>@endif
                 </div>
-
-                <!-- Caso 2: Le falta para la insignia (Comentado para cuando conecten el backend) -->
-                <!--
-                <div class="alert alert-info mt-3 mb-0">
-                    <i class="bi bi-info-circle me-2"></i> Te faltan <strong>2 meses</strong> de cumplimiento continuo para obtener tu próxima insignia.
-                </div>
-                -->
+                @if($analisis)
+                <p>Fecha de muestra: {{ $analisis->fecha_muestra->format('d/m/Y') }}</p>
+                <p>Dictamen final: <strong>{{ $analisis->resultado_final }}</strong></p>
+                <a href="{{ route('analisis.mostrar', $analisis) }}" class="btn btn-outline-success">Ver análisis #{{ $analisis->getKey() }}</a>
+                @else
+                <p>Cargá un informe para consultar su evaluación.</p>
+                <a href="{{ route('analisis.crear') }}" class="btn btn-outline-success">Cargar análisis</a>
+                @endif
             </div>
-        </div>
+        </section>
+        <section class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <h3 class="h5">Permiso de vuelco</h3>
+                @if($permiso)
+                <p>Expediente: {{ $permiso->numero_expediente }}</p>
+                <p>Vencimiento: <strong>{{ $permiso->fecha_vencimiento->format('d/m/Y') }}</strong></p>
+                <p>Estado: <strong>{{ $estadoPermiso }}</strong></p>
+                <p>Trámite: {{ str_replace('_', ' ', $permiso->estado_tramite) }}</p>
+                @else
+                <p class="text-muted">Sin permiso registrado.</p>
+                @endif
+                <a href="{{ route('establecimientos.mostrar', $establecimiento) }}">Ver establecimiento</a>
+            </div>
+        </section>
+        <section class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h3 class="h5">Insignias de cumplimiento</h3>
+                @forelse($insignias as $insignia)
+                <div class="border-bottom py-3">
+                    <strong class="text-success">{{ $insignia->nombre }}</strong>
+                    <p class="small text-muted mb-0">Otorgada el {{ $insignia->fecha_otorgamiento->format('d/m/Y') }}</p>
+                </div>
+                @empty
+                <p class="text-muted">Todavía no hay insignias otorgadas a este establecimiento.</p>
+                @endforelse
+                <a href="{{ route('insignias.index') }}" class="d-inline-block mt-3">Ver mis insignias</a>
+            </div>
+        </section>
     </div>
-
-    <!-- Columna Derecha: Alertas Climáticas -->
-    <div class="col-lg-4 mt-4 mt-lg-0">
-        <h2 class="mb-4 h5 text-muted text-uppercase fw-bold pt-2">Avisos del ICAA</h2>
-        
-        <div class="card shadow-sm border-0 bg-light">
+    <div class="col-lg-4">
+        <section class="card shadow-sm border-0">
             <div class="card-body p-4">
-                
-                <!-- Alerta 1 -->
-                <div class="alert alert-danger border-0 border-start border-4 border-danger bg-white shadow-sm mb-3">
-                    <div class="d-flex justify-content-between">
-                        <strong class="text-danger">Lluvia Intensa (Iberá)</strong>
-                        <small class="text-muted">Hace 2h</small>
-                    </div>
-                    <p class="small mb-0 mt-1">Prioridad Alta: Riesgo de saturación en pozos absorbentes.</p>
+                <h3 class="h5">Alertas climáticas registradas</h3>
+                <p class="small text-muted">Hasta 5 avisos con períodos que todavía no finalizaron. La fecha de consulta indica cuándo se obtuvo cada pronóstico.</p>
+                @forelse($alertas as $alerta)
+                <div class="alert alert-warning">
+                    <strong>{{ str_replace('_', ' ', $alerta->tipo) }}</strong>
+                    <p class="small mb-1">Desde {{ $alerta->fecha_evento->format('d/m/Y') }} hasta {{ ($alerta->periodo_hasta ?? $alerta->fecha_evento)->format('d/m/Y') }}</p>
+                    <p class="small mb-1">Precipitación prevista: {{ $alerta->milimetros_lluvia }} mm</p>
+                    <p class="small mb-0">Consulta: {{ $alerta->consultado_en?->format('d/m/Y H:i') ?? 'Sin fecha registrada' }}</p>
                 </div>
-
-                <!-- Alerta 2 -->
-                <div class="alert alert-warning border-0 border-start border-4 border-warning bg-white shadow-sm mb-3">
-                    <div class="d-flex justify-content-between">
-                        <strong class="text-warning text-dark">Tormenta Eléctrica</strong>
-                        <small class="text-muted">Ayer</small>
-                    </div>
-                    <p class="small mb-0 mt-1">Prioridad Media: Posibles cortes de energía en la zona.</p>
-                </div>
-                
-                <!-- Alerta 3 -->
-                <div class="alert alert-secondary border-0 border-start border-4 border-secondary bg-white shadow-sm mb-0">
-                    <div class="d-flex justify-content-between">
-                        <strong class="text-secondary">Crecida del Río</strong>
-                        <small class="text-muted">Hace 3 días</small>
-                    </div>
-                    <p class="small mb-0 mt-1">Informativo: Niveles dentro de los parámetros normales.</p>
-                </div>
-
+                @empty
+                <p>Sin alertas registradas para períodos vigentes. Esto no confirma ausencia de riesgo.</p>
+                @endforelse
+                <a href="{{ route('establecimientos.clima', $establecimiento) }}" class="btn btn-outline-success">Consultar pronóstico</a>
             </div>
-        </div>
+        </section>
     </div>
 </div>
+@else
+<div class="card shadow-sm border-0"><div class="card-body p-4">
+    <h2 class="h5">Todavía no tenés establecimientos registrados</h2>
+    <p>Registrá tu establecimiento para consultar sus análisis, permisos e insignias.</p>
+    <a href="{{ route('establecimientos.crear') }}" class="btn btn-success">Registrar establecimiento</a>
+</div></div>
+@endif
 @endsection

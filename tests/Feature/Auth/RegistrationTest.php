@@ -17,10 +17,11 @@ test('new users can register', function () {
         'password_confirmation' => 'ClaveLargaParaPrueba123',
     ]);
 
-    $this->assertAuthenticated();
     $response->assertRedirect(route('establecimientos.indice'));
+    $this->assertAuthenticated();
 
     $user = User::where('email', 'test@example.com')->firstOrFail();
     expect($user->rol)->toBe('propietario');
-    expect($user->name)->toBe('Test User');
+    expect($user->nombre)->toBe('Test')
+        ->and($user->apellido)->toBe('User');
 });

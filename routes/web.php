@@ -5,6 +5,8 @@ use App\Http\Controllers\AlertaClimaticaController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Controllers\ClimaEstablecimientoController;
 use App\Http\Controllers\EstablecimientoController;
+use App\Http\Controllers\InsigniaController;
+use App\Http\Controllers\PanelEstablecimientoController;
 use App\Http\Controllers\PanelGestionController;
 use App\Http\Controllers\PermisoVuelcoController;
 use App\Http\Controllers\ProfileController;
@@ -24,7 +26,7 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('/alertas-climaticas/{alerta}', [AlertaClimaticaController::class, 'update'])->name('alertas.revisar');
     Route::post('/logout', [SesionController::class, 'destroy'])->name('logout');
 
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/dashboard', [PanelEstablecimientoController::class, 'index'])->name('dashboard');
     Route::get('/gestion', [PanelGestionController::class, 'index'])->name('gestion');
 
     Route::get('/establecimientos/{establecimiento}/clima', [ClimaEstablecimientoController::class, 'show'])->middleware('throttle:20,1')->name('establecimientos.clima');
@@ -43,12 +45,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/analisis/{analisis}', [AnalisisController::class, 'show'])->name('analisis.mostrar');
     Route::get('/analisis/{analisis}/pdf', [AnalisisController::class, 'download'])->name('analisis.pdf');
 
-    
-
     // Panel de insignias de cumplimiento
-    Route::get('/insignias', function () {
-        return view('insignias');
-    })->name('insignias.index');
+    Route::get('/insignias', [InsigniaController::class, 'index'])->name('insignias.index');
 
     // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -56,7 +54,7 @@ Route::middleware('auth')->group(function (): void {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rutas para administración / inspectores / gobierno
-    Route::prefix('admin')->group(function (): void {
+    Route::middleware('role:admin_gobierno')->prefix('admin')->group(function (): void {
         Route::get('/dashboard', [InspectorController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/detalle-establecimientos', [InspectorController::class, 'index'])->name('admin.detalle-establecimientos');
         Route::get('/alertas', [InspectorController::class, 'alertas'])->name('admin.alertas');
@@ -71,14 +69,13 @@ Route::middleware('auth')->group(function (): void {
     });
 
     // Rutas de compatibilidad con /icaa/...
-    Route::prefix('icaa')->group(function (): void {
+    Route::middleware('role:inspector,admin_gobierno')->prefix('icaa')->group(function (): void {
         Route::get('/dashboard', [InspectorController::class, 'dashboard']);
         Route::get('/inspectores', [InspectorController::class, 'index']);
         Route::get('/alertas', [InspectorController::class, 'alertas']);
         Route::get('/exportar', [InspectorController::class, 'exportarCsv']);
     });
 
-   
 });
 
 require __DIR__.'/auth.php';

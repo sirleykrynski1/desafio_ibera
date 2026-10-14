@@ -15,7 +15,7 @@ class RevisionAnalisisController extends Controller
         Gate::authorize('revisarAnalisis', $analisis->establecimiento);
         $datos = $request->validate([
             'resultado_final' => ['required', 'in:Aprobado,Rechazado'],
-            
+            'observaciones_revision' => ['required', 'string', 'max:2000'],
         ]);
 
         $actualizados = AnalisisLaboratorio::whereKey($analisis->getKey())
@@ -23,7 +23,9 @@ class RevisionAnalisisController extends Controller
             ->whereIn('estado', ['evaluado', 'observado'])
             ->update([
                 'resultado_final' => $datos['resultado_final'],
-                
+                'observaciones_revision' => $datos['observaciones_revision'],
+                'revisado_por' => $request->user()->id,
+                'revisado_en' => now(),
                 'estado' => 'revisado',
             ]);
 
