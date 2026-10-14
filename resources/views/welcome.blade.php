@@ -234,10 +234,6 @@
         linear-gradient(165deg, #dcece3, #adcfc0 48%, #73a991);
       box-shadow: 0 24px 70px rgba(22, 79, 62, .12);
     }
-    /* Sustituir el placeholder por:
-       <img class="photo" src="/images/ibera-hero.jpg"
-            alt="Vista panorámica de los Esteros del Iberá">
-    */
     .photo {
       position: absolute;
       inset: 0;
@@ -245,6 +241,8 @@
       height: 100%;
       object-fit: cover;
     }
+    .photo-fauna { object-position: 36% center; }
+    .photo-ecoturismo { object-position: 65% center; }
     .image-placeholder {
       position: relative;
       z-index: 1;
@@ -686,14 +684,9 @@
 
         <div class="hero-visual">
           <div class="hero-image">
-            <!-- Reemplazar este bloque por una fotografía .photo. -->
-            <div class="image-placeholder">
-              <svg class="icon" aria-hidden="true">
-                <use href="#i-landscape"/>
-              </svg>
-              <strong>Esteros del Iberá</strong>
-              <small>Espacio para una fotografía panorámica</small>
-            </div>
+            <img class="photo" src="{{ asset('images/ibera-laguna.webp') }}"
+                 alt="Paisaje inspirado en el Iberá, con una laguna tranquila y vegetación acuática"
+                 width="1536" height="1024" fetchpriority="high">
 
             <span class="location-label">
               <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
@@ -812,40 +805,24 @@
 
         <div class="gallery" aria-label="Paisajes y biodiversidad del Iberá">
           <figure class="gallery-item">
-            <!-- Reemplazar el placeholder por:
-            <img class="photo" src="/images/ibera-humedal.jpg"
-                 alt="Vegetación y canales de agua de los Esteros del Iberá">
-            -->
-            <div class="image-placeholder">
-              <svg class="icon" aria-hidden="true">
-                <use href="#i-landscape"/>
-              </svg>
-              <strong>El humedal</strong>
-              <small>Espacio para fotografía</small>
-            </div>
+            <img class="photo" src="{{ asset('images/ibera-humedal.webp') }}"
+                 alt="El agua y la vegetación de los humedales del Iberá"
+                 width="2752" height="1536" loading="lazy" decoding="async">
             <figcaption>Un paisaje que merece ser cuidado.</figcaption>
           </figure>
 
           <figure class="gallery-item">
-            <!-- Imagen sugerida: fauna autóctona del Iberá. -->
-            <div class="image-placeholder">
-              <svg class="icon" aria-hidden="true">
-                <use href="#i-landscape"/>
-              </svg>
-              <strong>Fauna del Iberá</strong>
-              <small>Espacio para fotografía</small>
-            </div>
+            <img class="photo photo-fauna" src="{{ asset('images/ibera-fauna.webp') }}"
+                 alt="Familia de carpinchos junto al agua entre plantas nativas"
+                 width="2752" height="1536" loading="lazy" decoding="async">
             <figcaption>La vida que nos rodea.</figcaption>
           </figure>
 
           <figure class="gallery-item">
-            <!-- Imagen sugerida: flora y vegetación acuática. -->
-            <div class="image-placeholder">
-              <svg class="icon" aria-hidden="true"><use href="#i-leaf"/></svg>
-              <strong>Flora nativa</strong>
-              <small>Espacio para fotografía</small>
-            </div>
-            <figcaption>Un equilibrio que compartimos.</figcaption>
+            <img class="photo photo-ecoturismo" src="{{ asset('images/ibera-ecoturismo.webp') }}"
+                 alt="Guía y visitante recorriendo en bote un canal del Iberá"
+                 width="2752" height="1536" loading="lazy" decoding="async">
+            <figcaption>Ecoturismo: conocer para cuidar.</figcaption>
           </figure>
         </div>
       </div>
