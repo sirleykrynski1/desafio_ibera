@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<h1>Eco-Iberá</h1>
+<h1>Yporá</h1>
 <p>Seguimiento de análisis de efluentes y apoyo a las inspecciones ambientales.</p>
 <h2 class="h4">Establecimientos</h2>
 <p>Registrá tu establecimiento, cargá informes de laboratorio y consultá su estado.</p>
