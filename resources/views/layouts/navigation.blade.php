@@ -19,7 +19,7 @@
             <!-- Logo Móvil -->
             <a href="{{ auth()->user()->es('inspector', 'admin_gobierno') ? route('admin.dashboard') : route('dashboard') }}" class="d-flex align-items-center text-decoration-none text-dark">
                 <span class="fs-4 me-1 text-success">🌿</span>
-                <span class="fw-bold fs-6">Eco-Iberá</span>
+                <span class="fw-bold fs-6">Yporá</span>
             </a>
         </div>
 
@@ -59,7 +59,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="h6 mb-0 fw-bold text-dark">Eco-Iberá</h1>
+                    <h1 class="h6 mb-0 fw-bold text-dark">Yporá</h1>
                     <small class="text-muted d-block" style="font-size: 11px;">
                         @if(auth()->user()->es('inspector', 'admin_gobierno'))
                             Gestión ICAA Corrientes

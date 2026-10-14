@@ -4,8 +4,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#164f3e">
   <meta name="description"
-        content="Ypora: monitoreo ambiental y gestión de efluentes para establecimientos y organismos públicos. Tecnología al servicio del Iberá.">
-  <title>Ypora — Tecnología para cuidar el Iberá</title>
+        content="Yporá: monitoreo ambiental y gestión de efluentes para establecimientos y organismos públicos. Tecnología al servicio del Iberá.">
+  <title>Yporá — Tecnología para cuidar el Iberá</title>
 
   <style>
     /* ==================== BASE ==================== */
@@ -628,11 +628,11 @@
 
   <header class="header">
     <nav class="nav container" aria-label="Navegación principal">
-      <a class="brand" href="#inicio" aria-label="Ypora, inicio">
+      <a class="brand" href="#inicio" aria-label="Yporá, inicio">
         <span class="brand-mark">
           <svg class="icon" aria-hidden="true"><use href="#i-drop"/></svg>
         </span>
-        Ypora
+        Yporá
       </a>
 
       <div class="nav-links">
@@ -709,7 +709,7 @@
     <div class="container">
       <div class="context">
         <p>Una misma herramienta. Un compromiso compartido.</p>
-        <div class="context-tags" aria-label="Destinatarios de Ypora">
+        <div class="context-tags" aria-label="Destinatarios de Yporá">
           <span>Establecimientos</span>
           <span>Organismos públicos</span>
           <span>Ecosistema Iberá</span>
@@ -794,7 +794,7 @@
             Protegerla es cuidar mucho más que un recurso.
           </p>
           <p>
-            Ypora busca acercar información a quienes pueden actuar.
+            Yporá busca acercar información a quienes pueden actuar.
             Porque una gestión responsable de los efluentes
             también es una forma de conservar la vida.
           </p>
@@ -832,7 +832,7 @@
       <span class="eyebrow">Empecemos por lo que podemos cuidar</span>
       <h2 id="closing-title">Una gestión más clara.<br>Un futuro más verde.</h2>
       <p>
-        Accedé a Ypora y acompañá el cuidado del agua
+        Accedé a Yporá y acompañá el cuidado del agua
         desde tu establecimiento u organismo.
       </p>
       <a class="button button-primary" href="/login">
@@ -843,11 +843,11 @@
   </main>
 
   <footer class="footer container">
-    <a class="brand" href="#inicio" aria-label="Ypora, volver al inicio">
+    <a class="brand" href="#inicio" aria-label="Yporá, volver al inicio">
       <span class="brand-mark">
         <svg class="icon" aria-hidden="true"><use href="#i-drop"/></svg>
       </span>
-      Ypora
+      Yporá
     </a>
     <p>Monitoreo ambiental y gestión de efluentes · Corrientes, Argentina</p>
   </footer>
