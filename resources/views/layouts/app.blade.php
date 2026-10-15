@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Eco-Iberá') }} - Gestión de Efluentes</title>
+    <title>Yporá - Gestión de Efluentes</title>
     
     <!-- Carga de Tailwind, Bootstrap y Estilos vía Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -54,7 +54,7 @@
             {{-- VISTA SIN SIDEBAR (LOGIN, REGISTRO, INICIO) --}}
             <nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4 shadow-sm">
                 <div class="container">
-                    <a class="navbar-brand fw-bold" href="{{ route('inicio') }}">🌿 Eco-Iberá</a>
+                    <a class="navbar-brand fw-bold" href="{{ route('inicio') }}">🌿 Yporá</a>
                     <div class="ms-auto">
                         <a class="btn btn-outline-light btn-sm" href="{{ route('login') }}">Ingresar</a>
                     </div>
@@ -84,7 +84,7 @@
         {{-- VISTA PÚBLICA PARA USUARIOS NO AUTENTICADOS --}}
         <nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4 shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-bold" href="{{ route('inicio') }}">🌿 Eco-Iberá</a>
+                <a class="navbar-brand fw-bold" href="{{ route('inicio') }}">🌿 Yporá</a>
                 <div class="ms-auto">
                     <a class="btn btn-outline-light btn-sm" href="{{ route('login') }}">Ingresar</a>
                 </div>

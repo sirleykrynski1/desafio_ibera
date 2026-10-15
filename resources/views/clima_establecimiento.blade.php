@@ -16,6 +16,9 @@
 <p>Fuente: {{ $alerta['fuente'] }}. Consulta: {{ $alerta['consultado_en'] }}.</p>
 <p>Reglas climáticas: {{ $alerta['version_reglas'] }}. Criterio provisional del prototipo, pendiente de validación con especialistas.</p>
 @endif
-<a class="btn btn-outline-success" href="{{ route('establecimientos.clima', $establecimiento) }}">Volver a consultar</a>
-<a href="{{ route('establecimientos.mostrar', $establecimiento) }}">Volver al establecimiento</a>
+<div class="d-flex flex-wrap gap-2 mt-4">
+    <a class="btn btn-outline-success" href="{{ route('establecimientos.clima', $establecimiento) }}">Volver a consultar</a>
+    <a class="btn btn-outline-secondary" href="{{ route('dashboard', ['establecimiento' => $establecimiento->id]) }}">Volver al resumen</a>
+    <a class="btn btn-link" href="{{ route('establecimientos.mostrar', $establecimiento) }}">Ver establecimiento</a>
+</div>
 @endsection
