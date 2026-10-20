@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+@if($errors->any())
+    <div class="alert alert-danger" role="alert">
+        <p>Revisá los datos del establecimiento:</p>
+        <ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+    </div>
+@endif
 <div class="py-2">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -157,6 +163,7 @@
                                                             @method('PUT')
                                                             
                                                             <div class="modal-body p-4 text-start">
+                                                                @include('admin.propietario-coordenadas', ['establecimientoFormulario' => $est])
                                                                 <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <label class="form-label text-muted fw-semibold small">Nombre</label>
@@ -252,6 +259,7 @@
             <form action="{{ route('icaa.establecimientos.guardar') }}" method="POST">
                 @csrf
                 <div class="modal-body p-4">
+                    @include('admin.propietario-coordenadas', ['establecimientoFormulario' => null])
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-muted fw-semibold small">Nombre del establecimiento</label>

@@ -5,7 +5,8 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1">Visión General del Iberá</h2>
-            <p class="text-muted mb-0 small">Resumen de establecimientos registrados y estado de cumplimiento normativo</p>
+            <p class="text-muted mb-0 small">Evaluación automática del último análisis de cada establecimiento. El dictamen del inspector se consulta por separado.</p>
+            <p class="text-muted mb-0 small">Sin evaluación automática disponible: {{ $sin_evaluacion }}</p>
         </div>
         <div>
             <a href="{{ route('admin.detalle-establecimientos') }}" class="btn btn-outline-success btn-sm rounded-pill px-3">
@@ -98,7 +99,7 @@
                 </div>
                 <div class="position-relative z-index-1">
                     <h5 class="fw-bold mb-3"><i class="bi bi-star-fill me-2 text-warning"></i> Establecimientos en Norma</h5>
-                    <p class="small mb-4 text-light">Establecimientos destacados por su cumplimiento normativo.</p>
+                    <p class="small mb-4 text-light">Último análisis con evaluación automática favorable; no implica aprobación del inspector.</p>
                     
                     <ul class="list-group list-group-flush rounded-3 text-dark">
                         @forelse($recomendados ?? [] as $index => $est)
@@ -108,7 +109,7 @@
                             </li>
                         @empty
                             <li class="list-group-item d-flex justify-content-between align-items-center bg-white text-muted">
-                                <small>Aún no hay establecimientos con dictamen aprobado.</small>
+                                <small>Aún no hay establecimientos con evaluación automática favorable.</small>
                             </li>
                         @endforelse
                         <li class="list-group-item d-flex justify-content-between align-items-center bg-white text-muted">

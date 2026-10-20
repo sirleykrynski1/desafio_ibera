@@ -56,7 +56,7 @@
                                 <p class="mb-1 small">• {{ $alerta->mensaje ?? $alerta->descripcion ?? 'Alerta climática registrada en la zona.' }}</p>
                             @endforeach
                         @else
-                            <p class="mb-0 small">No se registran alertas climáticas ni de rebosamiento en esta zona en los últimos 7 días.</p>
+                            <p class="mb-0 small">No hay alertas climáticas vigentes pendientes de revisión para este establecimiento.</p>
                         @endif
                     </div>
                 </div>
