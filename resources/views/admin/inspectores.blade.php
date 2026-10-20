@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+@if($errors->any())
+    <div class="alert alert-danger" role="alert">
+        <p>Revisá los datos del establecimiento:</p>
+        <ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+    </div>
+@endif
 <div class="py-2">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -134,22 +140,13 @@
                                             <div class="d-flex gap-2">
                                                 <!-- BOTÓN VER DETALLE -->
                                                 <a href="{{ route('icaa.establecimientos.ver', $est->id) }}" class="btn btn-sm btn-outline-info rounded-pill">
-                                                    <i class="bi bi-eye"></i>
+                                                    <i class="bi bi-eye text-primary"></i>
                                                 </a>
 
                                                 <!-- BOTÓN EDITAR -->
                                                  <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $est->id }}">
-                                                    <i class="bi bi-pencil-square"></i>
+                                                    <i class="bi bi-pencil-square text-primary"></i>
                                                 </button>
-
-                                                <!-- BOTÓN ELIMINAR -->
-                                                <form action="{{ route('icaa.establecimientos.eliminar', $est->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
                                             </div>
 
                                             <!-- VENTANA FLOTANTE (MODAL) PARA EDITAR -->
@@ -166,6 +163,7 @@
                                                             @method('PUT')
                                                             
                                                             <div class="modal-body p-4 text-start">
+                                                                @include('admin.propietario-coordenadas', ['establecimientoFormulario' => $est])
                                                                 <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <label class="form-label text-muted fw-semibold small">Nombre</label>
@@ -261,6 +259,7 @@
             <form action="{{ route('icaa.establecimientos.guardar') }}" method="POST">
                 @csrf
                 <div class="modal-body p-4">
+                    @include('admin.propietario-coordenadas', ['establecimientoFormulario' => null])
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-muted fw-semibold small">Nombre del establecimiento</label>

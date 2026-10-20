@@ -64,7 +64,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/exportar', [InspectorController::class, 'exportarCsv'])->name('icaa.exportar');
         Route::get('/establecimientos/{id}', [InspectorController::class, 'show'])->name('icaa.establecimientos.ver');
         Route::post('/establecimientos', [InspectorController::class, 'store'])->name('icaa.establecimientos.guardar');
-        Route::post('/establecimientos/{id}', [InspectorController::class, 'updateEstablecimiento'])->name('icaa.establecimientos.actualizar');
+        Route::match(['post', 'put'], '/establecimientos/{id}', [InspectorController::class, 'updateEstablecimiento'])->name('icaa.establecimientos.actualizar');
         Route::post('/establecimientos/{id}/eliminar', [InspectorController::class, 'destroyEstablecimiento'])->name('icaa.establecimientos.eliminar');
     });
 

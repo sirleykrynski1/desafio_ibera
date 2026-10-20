@@ -17,7 +17,7 @@
             </button>
 
             <!-- Logo Móvil -->
-            <a href="{{ auth()->user()->es('inspector', 'admin_gobierno') ? route('admin.dashboard') : route('dashboard') }}" class="d-flex align-items-center text-decoration-none text-dark">
+            <a href="{{ auth()->user()->es('admin_gobierno') ? route('admin.dashboard') : (auth()->user()->es('inspector') ? route('gestion') : route('dashboard')) }}" class="d-flex align-items-center text-decoration-none text-dark">
                 <span class="fs-4 me-1 text-success">🌿</span>
                 <span class="fw-bold fs-6">Yporá</span>
             </a>
@@ -52,7 +52,7 @@
         
         <!-- ENCABEZADO DEL SIDEBAR -->
         <div class="sidebar-header p-3 border-bottom d-flex align-items-center justify-content-between bg-body-tertiary">
-            <a href="{{ auth()->user()->es('inspector', 'admin_gobierno') ? route('admin.dashboard') : route('dashboard') }}" class="d-flex align-items-center text-decoration-none text-dark gap-2">
+            <a href="{{ auth()->user()->es('admin_gobierno') ? route('admin.dashboard') : (auth()->user()->es('inspector') ? route('gestion') : route('dashboard')) }}" class="d-flex align-items-center text-decoration-none text-dark gap-2">
                 <div class="brand-icon-wrapper rounded-3 bg-success text-white d-flex align-items-center justify-content-center shadow-sm">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
@@ -102,78 +102,80 @@
         <!-- NAVEGACIÓN PRINCIPAL -->
         <nav class="sidebar-nav-list flex-grow-1 px-2 py-2 overflow-y-auto">
             @if(auth()->user()->es('inspector', 'admin_gobierno'))
-                {{-- ======================================================== --}}
-                {{-- MENÚ PARA INSPECTORES / GOBIERNO (ADMINISTRACIÓN)      --}}
-                {{-- ======================================================== --}}
-                <div class="sidebar-section-title px-3 pt-2 pb-1 text-uppercase text-muted fw-bold" style="font-size: 11px; letter-spacing: 0.05em;">
-                    Administración
-                </div>
-
-                {{-- 1. /admin/dashboard → resumen: X establecimientos, Y en norma, Z en alerta --}}
-                <a href="{{ route('admin.dashboard') }}"
-                   class="sidebar-nav-item d-flex align-items-center px-3 py-2 rounded-3 text-decoration-none my-1 {{ request()->routeIs('admin.dashboard') || request()->is('admin/dashboard') ? 'active bg-success text-white' : 'text-dark hover-bg' }}">
-                    <div class="nav-icon me-3 d-flex align-items-center justify-content-center">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
+                @if(auth()->user()->es('admin_gobierno'))
+                    {{-- ======================================================== --}}
+                    {{-- MENÚ EXCLUSIVO PARA ADMIN GOBIERNO (ADMINISTRACIÓN)      --}}
+                    {{-- ======================================================== --}}
+                    <div class="sidebar-section-title px-3 pt-2 pb-1 text-uppercase text-muted fw-bold" style="font-size: 11px; letter-spacing: 0.05em;">
+                        Administración
                     </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-semibold small">Dashboard</div>
-                        <div class="nav-subtitle small {{ request()->routeIs('admin.dashboard') || request()->is('admin/dashboard') ? 'text-white-50' : 'text-muted' }}" style="font-size: 11px;">
-                            Resumen y métricas
+
+                    {{-- 1. /admin/dashboard → resumen: X establecimientos, Y en norma, Z en alerta --}}
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="sidebar-nav-item d-flex align-items-center px-3 py-2 rounded-3 text-decoration-none my-1 {{ request()->routeIs('admin.dashboard') || request()->is('admin/dashboard') ? 'active bg-success text-white' : 'text-dark hover-bg' }}">
+                        <div class="nav-icon me-3 d-flex align-items-center justify-content-center">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                            </svg>
                         </div>
-                    </div>
-                </a>
-
-                {{-- 2. /admin/detalle-establecimientos → listado completo --}}
-                <a href="{{ route('admin.detalle-establecimientos') }}"
-                   class="sidebar-nav-item d-flex align-items-center px-3 py-2 rounded-3 text-decoration-none my-1 {{ request()->routeIs('admin.detalle-establecimientos') || request()->is('admin/detalle-establecimientos*') ? 'active bg-success text-white' : 'text-dark hover-bg' }}">
-                    <div class="nav-icon me-3 d-flex align-items-center justify-content-center">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-semibold small">Establecimientos</div>
-                        <div class="nav-subtitle small {{ request()->routeIs('admin.detalle-establecimientos') || request()->is('admin/detalle-establecimientos*') ? 'text-white-50' : 'text-muted' }}" style="font-size: 11px;">
-                            Listado completo
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Dashboard</div>
+                            <div class="nav-subtitle small {{ request()->routeIs('admin.dashboard') || request()->is('admin/dashboard') ? 'text-white-50' : 'text-muted' }}" style="font-size: 11px;">
+                                Resumen y métricas
+                            </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
 
-                {{-- 3. /admin/alertas → alertas climáticas --}}
-                <a href="{{ route('admin.alertas') }}"
-                   class="sidebar-nav-item d-flex align-items-center px-3 py-2 rounded-3 text-decoration-none my-1 {{ request()->routeIs('admin.alertas') || request()->is('admin/alertas*') ? 'active bg-success text-white' : 'text-dark hover-bg' }}">
-                    <div class="nav-icon me-3 d-flex align-items-center justify-content-center">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-semibold small">Alertas Climáticas</div>
-                        <div class="nav-subtitle small {{ request()->routeIs('admin.alertas') || request()->is('admin/alertas*') ? 'text-white-50' : 'text-muted' }}" style="font-size: 11px;">
-                            Monitoreo ambiental
+                    {{-- 2. /admin/detalle-establecimientos → listado completo --}}
+                    <a href="{{ route('admin.detalle-establecimientos') }}"
+                       class="sidebar-nav-item d-flex align-items-center px-3 py-2 rounded-3 text-decoration-none my-1 {{ request()->routeIs('admin.detalle-establecimientos') || request()->is('admin/detalle-establecimientos*') ? 'active bg-success text-white' : 'text-dark hover-bg' }}">
+                        <div class="nav-icon me-3 d-flex align-items-center justify-content-center">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
                         </div>
-                    </div>
-                </a>
-
-                {{-- 4. admin/inspectores → inspectores --}}
-                <a href="{{ route('admin.inspectores') }}"
-                   class="sidebar-nav-item d-flex align-items-center px-3 py-2 rounded-3 text-decoration-none my-1 {{ request()->routeIs('admin.inspectores') || request()->is('admin/inspectores*') ? 'active bg-success text-white' : 'text-dark hover-bg' }}">
-                    <div class="nav-icon me-3 d-flex align-items-center justify-content-center">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-semibold small">Inspectores</div>
-                        <div class="nav-subtitle small {{ request()->routeIs('admin.inspectores') || request()->is('admin/inspectores*') ? 'text-white-50' : 'text-muted' }}" style="font-size: 11px;">
-                            Operaciones ICAA
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Establecimientos</div>
+                            <div class="nav-subtitle small {{ request()->routeIs('admin.detalle-establecimientos') || request()->is('admin/detalle-establecimientos*') ? 'text-white-50' : 'text-muted' }}" style="font-size: 11px;">
+                                Listado completo
+                            </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
 
-                <!-- Opciones complementarias de gestión -->
+                    {{-- 3. /admin/alertas → alertas climáticas --}}
+                    <a href="{{ route('admin.alertas') }}"
+                       class="sidebar-nav-item d-flex align-items-center px-3 py-2 rounded-3 text-decoration-none my-1 {{ request()->routeIs('admin.alertas') || request()->is('admin/alertas*') ? 'active bg-success text-white' : 'text-dark hover-bg' }}">
+                        <div class="nav-icon me-3 d-flex align-items-center justify-content-center">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Alertas Climáticas</div>
+                            <div class="nav-subtitle small {{ request()->routeIs('admin.alertas') || request()->is('admin/alertas*') ? 'text-white-50' : 'text-muted' }}" style="font-size: 11px;">
+                                Monitoreo ambiental
+                            </div>
+                        </div>
+                    </a>
+
+                    {{-- 4. admin/inspectores → inspectores --}}
+                    <a href="{{ route('admin.inspectores') }}"
+                       class="sidebar-nav-item d-flex align-items-center px-3 py-2 rounded-3 text-decoration-none my-1 {{ request()->routeIs('admin.inspectores') || request()->is('admin/inspectores*') ? 'active bg-success text-white' : 'text-dark hover-bg' }}">
+                        <div class="nav-icon me-3 d-flex align-items-center justify-content-center">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Inspectores</div>
+                            <div class="nav-subtitle small {{ request()->routeIs('admin.inspectores') || request()->is('admin/inspectores*') ? 'text-white-50' : 'text-muted' }}" style="font-size: 11px;">
+                                Operaciones ICAA
+                            </div>
+                        </div>
+                    </a>
+                @endif
+
+                <!-- Opciones de fiscalización (accesibles para Inspector y Admin Gobierno) -->
                 <div class="sidebar-section-title px-3 pt-3 pb-1 text-uppercase text-muted fw-bold" style="font-size: 11px; letter-spacing: 0.05em;">
                     Fiscalización
                 </div>
@@ -192,6 +194,23 @@
                         </div>
                     </div>
                 </a>
+
+                @if(auth()->user()->es('inspector'))
+                    <a href="{{ route('alertas.indice') }}"
+                       class="sidebar-nav-item d-flex align-items-center px-3 py-2 rounded-3 text-decoration-none my-1 {{ request()->routeIs('alertas.indice') ? 'active bg-success text-white' : 'text-dark hover-bg' }}">
+                        <div class="nav-icon me-3 d-flex align-items-center justify-content-center">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Alertas Climáticas</div>
+                            <div class="nav-subtitle small {{ request()->routeIs('alertas.indice') ? 'text-white-50' : 'text-muted' }}" style="font-size: 11px;">
+                                Historial y monitoreo
+                            </div>
+                        </div>
+                    </a>
+                @endif
 
             @else
                 {{-- ======================================================== --}}

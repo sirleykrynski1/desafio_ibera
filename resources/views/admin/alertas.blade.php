@@ -30,7 +30,7 @@
                                 {{ $alerta->mensaje }}
                             </h6>
                             <div class="d-flex flex-wrap gap-3 small mt-1">
-                                <span class="text-muted"><i class="bi bi-clock-history me-1"></i> Último análisis: <strong>{{ $alerta->ultimo_analisis }}</strong></span>
+                                <span class="text-muted"><i class="bi bi-clock-history me-1"></i> Consulta del pronóstico: <strong>{{ $alerta->ultimo_analisis }}</strong></span>
                                 <span class="text-{{ $alerta->color }}"><i class="bi bi-flag-fill me-1"></i> Prioridad: <strong>{{ $alerta->prioridad }}</strong></span>
                             </div>
                         </div>
@@ -38,14 +38,18 @@
                     
                     <!-- BOTÓN MARCAR COMO REVISADA -->
                     <div class="flex-shrink-0">
-                        <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                        <form method="POST" action="{{ route('alertas.revisar', $alerta->id) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-outline-success btn-sm rounded-pill px-3 fw-bold shadow-sm">
                             <i class="bi bi-check2-all me-1"></i> Marcar como revisada
                         </button>
+                        </form>
                     </div>
                 </div>
             @endforeach
 
-            @if(empty($alertas))
+            @if($alertas->isEmpty())
                 <div class="text-center text-muted py-5">
                     <i class="bi bi-shield-check fs-1 text-success opacity-50 mb-3 d-block"></i>
                     <h5 class="fw-bold">Todo en orden</h5>

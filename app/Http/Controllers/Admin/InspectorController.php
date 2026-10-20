@@ -3,95 +3,62 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request; // Necesitamos esto para recibir los datos del formulario
+use App\Http\Requests\GuardarEstablecimientoGobiernoRequest;
+use App\Models\AlertaClimatica;
+use App\Models\AnalisisLaboratorio;
+use App\Models\Establecimiento;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InspectorController extends Controller
 {
-    // Función para mostrar el panel con filtros
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        $query = DB::table('establecimientos');
-
-        // Filtro 1: Por Zona / Ubicación
-        if ($request->filled('zona')) {
-            $query->where('ubicacion', 'like', '%'.$request->zona.'%');
-        }
-
-        // Filtro 2: Por Destino de Vuelco
-        if ($request->filled('destino')) {
-            $query->where('tipo_destino_vuelco', $request->destino);
-        }
-
-        /*
-         * TODO PARA INTEGRACIÓN (Persona 1 / 5):
-         * Descomentar este bloque cuando la tabla 'analisis_laboratorio' esté lista.
-         *
-         * if ($request->filled('estado')) {
-         *     $resultado_bd = '';
-         *     if ($request->estado == 'verde') $resultado_bd = 'cumple';
-         *     if ($request->estado == 'amarillo') $resultado_bd = 'alerta';
-         *     if ($request->estado == 'rojo') $resultado_bd = 'incumple';
-         *
-         *     $query->whereExists(function ($q) use ($resultado_bd) {
-         *         $q->select(DB::raw(1))
-         *           ->from('analisis_laboratorio')
-         *           ->whereColumn('analisis_laboratorio.establecimiento_id', 'establecimientos.id')
-         *           ->where('resultado', $resultado_bd);
-         *     });
-         * }
-         */
-
-        $establecimientos = $query->get();
-
-        return view('admin.inspectores', compact('establecimientos'));
-    }
-
-    // Función para ver el detalle completo de un establecimiento
-    public function show($id)
-    {
-        // Buscamos los datos del establecimiento
-        $establecimiento = DB::table('establecimientos')->where('id', $id)->first();
-
-        // Si por algún motivo escriben un ID que no existe en la URL, lo devolvemos
-        if (! $establecimiento) {
-            return redirect('/icaa/inspectores')->with('error', 'Establecimiento no encontrado.');
-        }
-
-        /*
-         * TODO PARA INTEGRACIÓN:
-         * Cuando la Persona 1 termine, acá buscaremos el historial real:
-         * $analisis = DB::table('analisis_laboratorio')->where('establecimiento_id', $id)->orderBy('fecha', 'desc')->get();
-         */
-        $historial_analisis = []; // Lo dejamos vacío por ahora para que no tire error
-
-        return view('admin.detalle-establecimiento', compact('establecimiento', 'historial_analisis'));
-    }
-
-    // Función para crear un nuevo establecimiento
-    public function store(Request $request)
-    {
-        DB::table('establecimientos')->insert([
-            'user_id' => auth()->id() ?? 1,
-            'nombre' => $request->nombre,
-            'cuit' => $request->cuit,
-            'ubicacion' => $request->ubicacion,
-            'rubro' => $request->rubro,
-
-            // Le mandamos un 0 de forma "invisible" para cumplir con la base de datos
-            'latitud' => 0,
-            'longitud' => 0,
-
-            'capacidad_maxima' => $request->capacidad_maxima ?: 0,
-            'capacidad_biodigestor' => $request->capacidad_biodigestor ?: 0,
-            'tipo_destino_vuelco' => $request->tipo_destino_vuelco,
+        $datos = $request->validate([
+            'zona' => ['nullable', 'string', 'max:255'],
+            'destino' => ['nullable', 'in:cursos_agua,laguna,conducto_pluvial,absorcion_suelo'],
+            'estado' => ['nullable', 'in:verde,amarillo,rojo'],
         ]);
+        $establecimientos = $this->establecimientosConUltimoAnalisis()
+            ->when($datos['zona'] ?? null, fn (Builder $query, string $zona) => $query->where('ubicacion', 'like', '%'.$zona.'%'))
+            ->when($datos['destino'] ?? null, fn (Builder $query, string $destino) => $query->where('tipo_destino_vuelco', $destino))
+            ->get();
+        $resultado = match ($datos['estado'] ?? null) {
+            'verde' => 'cumple', 'amarillo' => 'alerta', 'rojo' => 'incumple', default => null,
+        };
+        if ($resultado !== null) {
+            $establecimientos = $establecimientos->filter(fn (Establecimiento $hotel) => $this->evaluacion($hotel->analisisLaboratorios->first()) === $resultado)->values();
+        }
+        $propietarios = User::where('rol', 'propietario')->orderBy('nombre')->get(['id', 'nombre', 'apellido', 'email']);
 
-        return redirect('/icaa/inspectores')->with('success', '¡Establecimiento creado correctamente!');
+        return view('admin.inspectores', compact('establecimientos', 'propietarios'));
+    }
+
+    public function show(int $id): View
+    {
+        $establecimiento = Establecimiento::findOrFail($id);
+        $historial_analisis = $establecimiento->analisisLaboratorios()
+            ->orderByDesc('fecha_muestra')->orderByDesc('analisis_laboratorio_id')->get();
+        $alertas_establecimiento = $this->obtenerAlertasReales($id);
+
+        return view('admin.detalle-establecimiento', compact('establecimiento', 'historial_analisis', 'alertas_establecimiento'));
+    }
+
+    public function store(GuardarEstablecimientoGobiernoRequest $request): RedirectResponse
+    {
+        Establecimiento::create($request->validated());
+
+        return back()->with('success', '¡Establecimiento creado correctamente!');
     }
 
     // Muestra la vista del formulario de análisis
-    public function createAnalisis()
+    public function createAnalisis(): View
     {
         $establecimientos = DB::table('establecimientos')->get();
 
@@ -99,145 +66,133 @@ class InspectorController extends Controller
     }
 
     // Guarda el análisis de laboratorio en la base de datos
-    public function storeAnalisis(Request $request)
+    public function storeAnalisis(Request $request): RedirectResponse
     {
-        try {
-            DB::table('analisis_laboratorio')->insert([
-                'establecimiento_id' => $request->establecimiento_id,
-                'fecha_muestra' => $request->fecha_muestra,
-                'laboratorio' => $request->laboratorio,
-                'resultado_sugerido' => $request->resultado_sugerido,
-                'estado' => $request->estado,
-                'resultado_final' => $request->resultado_final,
-                'ruta_pdf' => $request->ruta_pdf ?? 'sin_archivo.pdf',
-                'revisado_por' => $request->revisado_por ?? 'Inspector',
-                'revisado_en' => now(), // Agregamos este por las dudas
-                'observaciones_revision' => $request->observaciones_revision ?? '-',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            return redirect('/icaa/inspectores')->with('success', '¡Análisis guardado con éxito!');
-
-        } catch (\Exception $e) {
-            // Si la base de datos rechaza el guardado, esto va a detener la pantalla
-            // y te va a mostrar exactamente qué columna está causando el problema.
-            dd('ERROR AL GUARDAR:', $e->getMessage());
-        }
-    }
-
-    // Función para actualizar los datos
-    public function updateEstablecimiento(Request $request, $id)
-    {
-        DB::table('establecimientos')->where('id', $id)->update([
-            'nombre' => $request->nombre,
-            'cuit' => $request->cuit,
-            'ubicacion' => $request->ubicacion,
-            'rubro' => $request->rubro,
-            // Eliminamos latitud y longitud de este bloque para no borrar las coordenadas previas
-            'capacidad_maxima' => $request->capacidad_maxima ?: 0,
-            'capacidad_biodigestor' => $request->capacidad_biodigestor ?: 0,
-            'tipo_destino_vuelco' => $request->tipo_destino_vuelco,
+        $validated = $request->validate([
+            'establecimiento_id' => ['required', 'integer'],
+            'fecha_muestra' => ['required', 'date'],
+            'laboratorio' => ['required', 'string', 'max:255'],
+            'resultado_sugerido' => ['nullable', 'string', 'max:50'],
+            'estado' => ['nullable', 'string', 'max:50'],
+            'resultado_final' => ['nullable', 'string', 'max:50'],
+            'ruta_pdf' => ['nullable', 'string', 'max:255'],
+            'revisado_por' => ['nullable', 'string', 'max:255'],
+            'observaciones_revision' => ['nullable', 'string'],
         ]);
 
-        return redirect('/icaa/inspectores')->with('success', '¡Establecimiento actualizado correctamente!');
+        DB::table('analisis_laboratorio')->insert([
+            'establecimiento_id' => $validated['establecimiento_id'],
+            'fecha_muestra' => $validated['fecha_muestra'],
+            'laboratorio' => $validated['laboratorio'],
+            'resultado_sugerido' => $validated['resultado_sugerido'] ?? 'pendiente',
+            'estado' => $validated['estado'] ?? 'evaluado',
+            'resultado_final' => $validated['resultado_final'] ?? null,
+            'ruta_pdf' => $validated['ruta_pdf'] ?? 'sin_archivo.pdf',
+            'revisado_por' => $validated['revisado_por'] ?? 'Inspector',
+            'revisado_en' => now(),
+            'observaciones_revision' => $validated['observaciones_revision'] ?? '-',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', '¡Análisis guardado con éxito!');
     }
 
-    // Función para eliminar
-    public function destroyEstablecimiento($id)
+    public function updateEstablecimiento(GuardarEstablecimientoGobiernoRequest $request, int $id): RedirectResponse
     {
-        DB::table('establecimientos')->where('id', $id)->delete();
+        Establecimiento::findOrFail($id)->update($request->validated());
 
-        return redirect('/icaa/inspectores')->with('success', '¡Establecimiento eliminado del sistema!');
+        return back()->with('success', '¡Establecimiento actualizado correctamente!');
     }
 
-    // Función para el Dashboard de Resumen
-    public function dashboard()
+    public function destroyEstablecimiento(int $id): RedirectResponse
     {
-        // Contamos el total real de tu base de datos
-        $total_establecimientos = DB::table('establecimientos')->count();
+        Establecimiento::findOrFail($id)->delete();
 
-        /*
-         * TODO PARA INTEGRACIÓN (Persona 1 / 2):
-         * Cuando conecten los laboratorios, cambiar estos números fijos
-         * por consultas reales (ej: count() donde resultado = 'cumple').
-         */
-        $en_norma = 12;   // Valor simulado para tu maquetación
-        $en_alerta = 3;   // Valor simulado para tu maquetación
-        $incumplen = 1;   // Valor simulado para tu maquetación
-
-        return view('admin.dashboard', compact('total_establecimientos', 'en_norma', 'en_alerta', 'incumplen'));
+        return back()->with('success', '¡Establecimiento eliminado del sistema!');
     }
 
-    // Función para el panel de Alertas Climáticas y de Riesgo
-    public function alertas()
+    public function dashboard(): View
     {
-        /*
-         * TODO PARA INTEGRACIÓN (Persona 1 / 2):
-         * Acá se leerá la tabla de 'alertas_climaticas' generada por el Job de Python.
-         */
+        $establecimientos = $this->establecimientosConUltimoAnalisis()->get();
+        $total_establecimientos = $establecimientos->count();
+        $evaluaciones = $establecimientos->map(fn (Establecimiento $hotel) => $this->evaluacion($hotel->analisisLaboratorios->first()));
+        $en_norma = $evaluaciones->filter(fn ($valor) => $valor === 'cumple')->count();
+        $en_alerta = $evaluaciones->filter(fn ($valor) => $valor === 'alerta')->count();
+        $incumplen = $evaluaciones->filter(fn ($valor) => $valor === 'incumple')->count();
+        $sin_evaluacion = $evaluaciones->filter(fn ($valor) => $valor === null)->count();
+        $alertas_recientes = $this->obtenerAlertasReales()->take(3);
+        $recomendados = $establecimientos->filter(fn (Establecimiento $hotel) => $this->evaluacion($hotel->analisisLaboratorios->first()) === 'cumple')->take(3)->values();
 
-        // Datos simulados para maquetar la vista
-        $alertas = [
-            (object) [
-                'id' => 1,
-                'establecimiento' => 'Ecoposada del Estero',
-                'mensaje' => 'Alerta climática (lluvia intensa)',
-                'ultimo_analisis' => '45 días',
-                'prioridad' => 'Alta',
-                'color' => 'danger',
-                'icono' => 'bi-cloud-rain-heavy-fill',
-            ],
-            (object) [
-                'id' => 2,
-                'establecimiento' => 'Hostería Rincón',
-                'mensaje' => 'Posible saturación de pozo absorbente',
-                'ultimo_analisis' => '12 días',
-                'prioridad' => 'Media',
-                'color' => 'warning',
-                'icono' => 'bi-droplet-half',
-            ],
-        ];
+        return view('admin.dashboard', compact('total_establecimientos', 'en_norma', 'en_alerta', 'incumplen', 'sin_evaluacion', 'alertas_recientes', 'recomendados'));
+    }
+
+    public function alertas(): View
+    {
+        $alertas = $this->obtenerAlertasReales();
 
         return view('admin.alertas', compact('alertas'));
     }
 
-    // Función para descargar el reporte CSV
-    public function exportarCsv()
+    /** @return Builder<Establecimiento> */
+    private function establecimientosConUltimoAnalisis(): Builder
     {
-        $establecimientos = DB::table('establecimientos')->get();
+        return Establecimiento::with(['analisisLaboratorios' => fn ($query) => $query
+            ->orderByDesc('fecha_muestra')->orderByDesc('analisis_laboratorio_id')->limit(1)])->orderBy('id');
+    }
 
-        // Configuramos las cabeceras para que el navegador sepa que es una descarga de archivo
-        $headers = [
-            'Content-type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename=reporte_icaa_establecimientos.csv',
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ];
+    private function evaluacion(?AnalisisLaboratorio $analisis): ?string
+    {
+        if ($analisis === null || in_array($analisis->estado, ['observado', 'pendiente_lectura'], true)) {
+            return null;
+        }
 
-        // Función que escribe los datos línea por línea
-        $callback = function () use ($establecimientos) {
+        return in_array($analisis->resultado_sugerido, ['cumple', 'alerta', 'incumple'], true)
+            ? $analisis->resultado_sugerido : null;
+    }
+
+    /** @return Collection<int, object> */
+    private function obtenerAlertasReales(?int $establecimientoId = null): Collection
+    {
+        return AlertaClimatica::with('establecimiento')
+            ->when($establecimientoId !== null, fn (Builder $query) => $query->where('establecimiento_id', $establecimientoId))
+            ->whereNull('revisada_en')
+            ->where(function (Builder $query): void {
+                $query->whereDate('periodo_hasta', '>=', today())
+                    ->orWhere(function (Builder $query): void {
+                        $query->whereNull('periodo_hasta')->whereDate('fecha_evento', '>=', today());
+                    });
+            })
+            ->orderByDesc('consultado_en')->orderByDesc('alerta_climatica_id')->get()
+            ->map(fn (AlertaClimatica $alerta) => (object) [
+                'id' => $alerta->getKey(),
+                'establecimiento' => $alerta->establecimiento?->nombre ?? 'Establecimiento no disponible',
+                'mensaje' => (collect($alerta->detalle['alerta']['motivos'] ?? [])->filter(fn ($motivo) => is_string($motivo))->implode(' ') ?: $alerta->tipo).' · '.$alerta->milimetros_lluvia.' mm de lluvia',
+                'ultimo_analisis' => $alerta->consultado_en?->diffForHumans() ?? 'Sin fecha de consulta',
+                'prioridad' => 'Preventiva',
+                'color' => 'warning',
+                'icono' => 'bi-cloud-rain-heavy-fill',
+            ]);
+    }
+
+    public function exportarCsv(): StreamedResponse
+    {
+        $establecimientos = $this->establecimientosConUltimoAnalisis()->get();
+
+        return response()->streamDownload(function () use ($establecimientos): void {
             $file = fopen('php://output', 'w');
-
-            // 1. Escribimos los títulos de las columnas
-            fputcsv($file, ['ID', 'Nombre', 'CUIT', 'Ubicación', 'Rubro', 'Destino Vuelco', 'Estado (Simulado)']);
-
-            // 2. Recorremos los establecimientos de la BD y los agregamos al archivo
+            fputcsv($file, ['ID', 'Nombre', 'CUIT', 'Ubicación', 'Rubro', 'Destino Vuelco', 'Evaluación automática', 'Dictamen final'], ',', '"', '');
             foreach ($establecimientos as $est) {
-                fputcsv($file, [
-                    $est->id,
-                    $est->nombre,
-                    $est->cuit,
-                    $est->ubicacion,
-                    $est->rubro,
-                    $est->tipo_destino_vuelco,
-                    'En revisión', // TODO Integración: acá irá el estado real cuando esté listo
-                ]);
+                $ultimo = $est->analisisLaboratorios->first();
+                $fila = [
+                    $est->id, $est->nombre, $est->cuit, $est->ubicacion, $est->rubro, $est->tipo_destino_vuelco,
+                    ucfirst($this->evaluacion($ultimo) ?? ($ultimo === null ? 'Sin análisis' : 'Sin evaluación automática')),
+                    $ultimo?->resultado_final ?? 'Sin dictamen',
+                ];
+                $fila = array_map(fn ($valor) => preg_match('/^[=+@\\-\\t\\r\\n]/', (string) $valor) ? "'".$valor : $valor, $fila);
+                fputcsv($file, $fila, ',', '"', '');
             }
             fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        }, 'reporte_icaa_establecimientos.csv', ['Content-Type' => 'text/csv; charset=utf-8']);
     }
 }
