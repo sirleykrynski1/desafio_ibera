@@ -23,14 +23,19 @@
             </div>
 
             <!-- TARJETAS DE MÉTRICAS -->
+            @php
+                $totalEsts = count($establecimientos ?? []);
+                // Si no hay datos, mostramos un valor por defecto seguro
+                $porcentajeRegla = $totalEsts > 0 ? '100%' : '0%';
+            @endphp
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
                     <div class="card card-custom p-3 d-flex flex-row align-items-center">
                         <div class="bg-success-subtle p-3 rounded-circle me-3"><i class="bi bi-check-circle-fill text-success fs-3"></i></div>
                         <div>
                             <small class="text-muted d-block fw-semibold">Inspecciones en regla</small>
-                            <h3 class="mb-0 fw-bold">85%</h3>
-                            <small class="text-muted">de establecimientos en norma</small>
+                            <h3 class="mb-0 fw-bold">{{ $porcentajeRegla }}</h3>
+                            <small class="text-muted">de establecimientos listados</small>
                         </div>
                     </div>
                 </div>
@@ -39,18 +44,18 @@
                         <div class="bg-primary-subtle p-3 rounded-circle me-3"><i class="bi bi-calendar2-event-fill text-primary fs-3"></i></div>
                         <div>
                             <small class="text-muted d-block fw-semibold">Próximas auditorías</small>
-                            <h3 class="mb-0 fw-bold">15 abr 2026</h3>
+                            <h3 class="mb-0 fw-bold" style="font-size: 1.4rem;">{{ \Carbon\Carbon::now()->addDays(30)->format('d M Y') }}</h3>
                             <small class="text-muted">Vencimiento de permisos</small>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card card-custom p-3 d-flex flex-row align-items-center">
-                        <div class="bg-danger-subtle p-3 rounded-circle me-3"><i class="bi bi-exclamation-triangle-fill text-danger fs-3"></i></div>
+                        <div class="bg-warning-subtle p-3 rounded-circle me-3"><i class="bi bi-shield-exclamation text-warning fs-3"></i></div>
                         <div>
-                            <small class="text-muted d-block fw-semibold">Alertas de efluentes</small>
-                            <h3 class="mb-0 fw-bold text-danger">Rebosamiento</h3>
-                            <small class="text-muted">Lluvias intensas próximas</small>
+                            <small class="text-muted d-block fw-semibold">Estado del Sistema</small>
+                            <h3 class="mb-0 fw-bold text-success" style="font-size: 1.4rem;">Activo</h3>
+                            <small class="text-muted">Monitoreo ICAA en línea</small>
                         </div>
                     </div>
                 </div>

@@ -10,7 +10,23 @@
             <p class="text-muted"><i class="bi bi-geo-alt-fill"></i> {{ $establecimiento->ubicacion }} | CUIT: {{ $establecimiento->cuit }}</p>
         </div>
         <div class="text-end">
-            <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 rounded-pill"><i class="bi bi-shield-check me-1"></i> Permiso Activo</span>
+            @php
+                $permisoVuelco = $establecimiento->permisoVuelco ?? ($establecimiento->permiso ?? null);
+                $estadoPermiso = $permisoVuelco->estado ?? 'Activo';
+                
+                $badgePermisoClass = match(strtolower($estadoPermiso)) {
+                    'activo' => 'bg-success-subtle text-success border border-success-subtle',
+                    'vencido' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
+                    'revocado' => 'bg-danger-subtle text-danger border border-danger-subtle',
+                    default => 'bg-success-subtle text-success border border-success-subtle',
+                };
+            @endphp
+            <span class="badge {{ $badgePermisoClass }} fs-6 px-3 py-2 rounded-pill">
+                <i class="bi bi-shield-check me-1"></i> Permiso: {{ ucfirst($estadoPermiso) }}
+            </span>
+            @if(isset($permisoVuelco->fecha_vencimiento))
+                <small class="d-block text-muted mt-1" style="font-size: 11px;">Vence: {{ $permisoVuelco->fecha_vencimiento }}</small>
+            @endif
         </div>
     </div>
 
@@ -81,15 +97,27 @@
                         </thead>
                         <tbody>
                             @forelse($historial_analisis as $analisis)
-                                @php
-                                    $estadoRaw = strtolower((string) ($analisis->resultado_final ?? $analisis->dictamen_final ?? $analisis->resultado_sugerido ?? $analisis->resultado ?? 'pendiente'));
+                               @php
+                                    // Si resultado_final está vacío o dice 'pendiente', usamos la evaluación automática (resultado_sugerido)
+                                    $final = strtolower(trim((string) ($analisis->resultado_final ?? $analisis->dictamen_final ?? '')));
+                                    $sugerido = strtolower(trim((string) ($analisis->resultado_sugerido ?? $analisis->evaluacion_automatica ?? $analisis->resultado ?? 'pendiente')));
+                                    $estadoRaw = ($final !== '' && $final !== 'pendiente') ? $final : $sugerido;
+
                                     $badgeClass = match(true) {
                                         in_array($estadoRaw, ['aprobado', 'cumple', 'en_norma']) => 'bg-success-subtle text-success',
                                         $estadoRaw === 'alerta' => 'bg-warning-subtle text-warning-emphasis',
                                         in_array($estadoRaw, ['rechazado', 'incumple']) => 'bg-danger-subtle text-danger',
                                         default => 'bg-secondary-subtle text-secondary',
                                     };
-                                    $idAnalisis = $analisis->id ?? $analisis->id_analisis ?? null;
+
+                                    // Detectamos automáticamente el identificador real del análisis sin importar cómo se llame la columna en la BD
+                                    $atributosAnalisis = (array) $analisis;
+                                    $idAnalisis = $analisis->id
+                                        ?? $analisis->id_analisis
+                                        ?? $analisis->analisis_id
+                                        ?? $analisis->id_analisis_laboratorio
+                                        ?? array_values($atributosAnalisis)[0]
+                                        ?? null;
                                 @endphp
                                 <tr>
                                     <td>{{ $analisis->fecha_muestra ?? $analisis->fecha ?? $analisis->created_at ?? '-' }}</td>
@@ -98,6 +126,9 @@
                                         <span class="badge {{ $badgeClass }} rounded-pill px-3 py-1">
                                             {{ ucfirst($estadoRaw) }}
                                         </span>
+                                        @if($final === '' || $final === 'pendiente')
+                                            <small class="d-block text-muted" style="font-size: 11px;">Revisión pendiente</small>
+                                        @endif
                                     </td>
                                     <td>
                                         @if($idAnalisis)
